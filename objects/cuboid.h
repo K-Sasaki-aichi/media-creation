@@ -1,7 +1,5 @@
-#ifndef KIT_H
-#define KIT_H
-
-#include <GL/glut.h>
+#ifndef CUBOID_H
+#define CUBOID_H
 
 void drawCuboid(float width, float height, float depth);
 void drawBeam(

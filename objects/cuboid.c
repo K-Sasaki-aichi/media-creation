@@ -1,6 +1,6 @@
+#include <GL/glut.h>
+#include "cuboid.h"
 #include <math.h>
-#include <stdlib.h>
-#include "kit.h"
 
 // 立方体を描く関数
 void drawCuboid(float width, float height, float depth)
