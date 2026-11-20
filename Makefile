@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall -O2
 LIBS = -lglut -lGLU -lGL -lm
 
-SRCS = main.c models/*.c objects/*.c
+SRCS = main.c models/*.h objects/*.c
 
 TARGET = xwing
 

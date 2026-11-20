@@ -1,16 +1,23 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
-typedef struct {
-    float x, y, z;
-} Vector3;
+#include <GL/glut.h>
 
-Vector3 add(Vector3 a, Vector3 b);
-Vector3 sub(Vector3 a, Vector3 b);
-Vector3 scale(Vector3 v, float s);
-float dot(Vector3 a, Vector3 b);
-Vector3 cross(Vector3 a, Vector3 b);
-float length(Vector3 v);
-Vector3 normalize(Vector3 v);
+typedef struct
+{
+    float x;
+    float y;
+    float z;
+} Vec3;
+
+static inline void glVertex3v(const Vec3* v)
+{
+    glVertex3f(v->x, v->y, v->z);
+}
+
+static inline void glNormal3v(const Vec3* n)
+{
+    glNormal3f(n->x, n->y, n->z);
+}
 
 #endif

@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include "models/canopy.h"
+#include "models/control.h"
+#include "objects/boxframe.h"
 
 #define PI 3.14159265358979323846
 
@@ -37,11 +39,35 @@ void display(void) {
     glLightfv(GL_LIGHT0, GL_POSITION, light0pos);
     glLightfv(GL_LIGHT1, GL_POSITION, light1pos);
 
-    /* 円筒を描画（半径1.0, 長さ3.0, 分割数32） */
+    float s = 0.005f;
+
+    glColor3f(1, 1, 1);
+    drawCanopy(s);
+
+    // 操縦桿の中央部分
     glPushMatrix();
-        glColor3f(0.65f, 0.68f, 0.72f);
-        drawCanopy(0.005f);
+    glTranslatef(-165.0f * s, 125.0f * s, -1060.0f * s);
+    glColor3f(0.65f, 0.68f, 0.72f);
+    drawControlCenter(s);
     glPopMatrix();
+
+    // 操縦桿の左側部分
+    // glPushMatrix();
+    // glTranslatef(-165.0f * s, 125.0f * s, -1060.0f * s);
+    // glColor3f(0.5f, 0.5f, 0.5f);
+    // drawControlStickSide(s);
+    // glPopMatrix();
+
+    // float s = 0.005f;
+    // glColor3f(1, 1, 1);
+    // drawCanopy(s);
+
+    // glPushMatrix();
+    // // 操縦桿の中央部分
+    // glTranslatef(-165.0f * s, 125.0f * s, -1060.0f * s);
+    // glColor3f(0.65f, 0.68f, 0.72f);
+    // drawControlCenter(s);
+    // glPopMatrix();
 
     glutSwapBuffers();
 }
@@ -64,7 +90,7 @@ void motion(int x, int y) {
         int dy = y - lastMouseY;
 
         rotY += dx * 0.5f;
-        rotX += dy * 0;
+        rotX += dy * 0.5;
 
         lastMouseX = x;
         lastMouseY = y;
