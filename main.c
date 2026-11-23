@@ -16,8 +16,8 @@ GLfloat red[]   = { 0.8, 0.2, 0.2, 1.0 };
 /* --- 視点と移動のための変数 --- */
 // パイロットの頭の位置
 float camX = 0.0f;
-float camY = 1.9f;
-float camZ = -3.0f;
+float camY = 0.0f;
+float camZ = 0.0f;
 
 // 視線の角度
 float rotX = 0.0f;
@@ -30,14 +30,15 @@ void display(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
+    /* 光源の位置設定 */
+    glLightfv(GL_LIGHT0, GL_POSITION, light0pos);
+    glLightfv(GL_LIGHT1, GL_POSITION, light1pos);
+
+
     /* 視点・カメラの設定 */
     glTranslatef(-camX, -camY, -camZ);  /* 位置移動 */
     glRotatef(rotX, 1.0f, 0.0f, 0.0f);  /* 上下回転 */
     glRotatef(rotY, 0.0f, 1.0f, 0.0f);  /* 左右回転 */
-
-    /* 光源の位置設定 */
-    glLightfv(GL_LIGHT0, GL_POSITION, light0pos);
-    glLightfv(GL_LIGHT1, GL_POSITION, light1pos);
 
     float s = 0.005f;
 
@@ -45,28 +46,9 @@ void display(void) {
     drawCanopy(s);
 
     // 操縦桿の中央部分
-    glColor3f(0.65f, 0.68f, 0.72f);
+    glColor3f(0.729f, 0.737f, 0.741f);
     drawControlCenter(s);
-    glColor3f(1, 0,0);
     drawControlside(s);
-
-    // 操縦桿の左側部分
-    // glPushMatrix();
-    // glTranslatef(-165.0f * s, 125.0f * s, -1060.0f * s);
-    // glColor3f(0.5f, 0.5f, 0.5f);
-    // drawControlStickSide(s);
-    // glPopMatrix();
-
-    // float s = 0.005f;
-    // glColor3f(1, 1, 1);
-    // drawCanopy(s);
-
-    // glPushMatrix();
-    // // 操縦桿の中央部分
-    // glTranslatef(-165.0f * s, 125.0f * s, -1060.0f * s);
-    // glColor3f(0.65f, 0.68f, 0.72f);
-    // drawControlCenter(s);
-    // glPopMatrix();
 
     glutSwapBuffers();
 }
@@ -162,19 +144,25 @@ void init(void) {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glEnable(GL_NORMALIZE);
 
-    /* 中に入るためカリングを無効化（裏面も描画） */
-    //glDisable(GL_CULL_FACE);
+    /* ライティングと光源を有効化 */
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
 
-    // glEnable(GL_LIGHTING);
-    // glEnable(GL_LIGHT0);
-
-    // glEnable(GL_LIGHT1);
-    // glLightfv(GL_LIGHT1, GL_DIFFUSE, green);
-    // glLightfv(GL_LIGHT1, GL_SPECULAR, green);
+    /* glColor3f の色を面の拡散反射・環境光に反映させる */
+    glEnable(GL_COLOR_MATERIAL);
+    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 
     /* 筒の内部に入った時に内壁を正しく照らすため両面ライティングを有効化 */
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+
+    /* 必要であれば GL_LIGHT1 も有効化 */
+    // glEnable(GL_LIGHT1);
+    // glLightfv(GL_LIGHT1, GL_DIFFUSE, green);
+    // glLightfv(GL_LIGHT1, GL_SPECULAR, green);
 }
 
 int main(int argc, char *argv[]) {

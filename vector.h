@@ -11,7 +11,7 @@ typedef struct
     float z;
 } Vec3;
 
-Vec3 add(Vec3 a, Vec3 b) {
+static Vec3 add(Vec3 a, Vec3 b) {
     return (Vec3){
         a.x + b.x,
         a.y + b.y,
@@ -19,7 +19,7 @@ Vec3 add(Vec3 a, Vec3 b) {
     };
 }
 
-Vec3 sub(Vec3 a, Vec3 b) {
+static Vec3 sub(Vec3 a, Vec3 b) {
     return (Vec3){
         a.x - b.x,
         a.y - b.y,
@@ -27,7 +27,7 @@ Vec3 sub(Vec3 a, Vec3 b) {
     };
 }
 
-Vec3 scale(Vec3 v, float s) {
+static Vec3 scale(Vec3 v, float s) {
     return (Vec3){
         v.x * s,
         v.y * s,
@@ -36,12 +36,12 @@ Vec3 scale(Vec3 v, float s) {
 }
 
 // 内積
-float dot(Vec3 a, Vec3 b) {
+static float dot(Vec3 a, Vec3 b) {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
 // 外積
-Vec3 cross(Vec3 a, Vec3 b) {
+static Vec3 cross(Vec3 a, Vec3 b) {
     return (Vec3){
         a.y * b.z - a.z * b.y,
         a.z * b.x - a.x * b.z,
@@ -49,15 +49,15 @@ Vec3 cross(Vec3 a, Vec3 b) {
     };
 }
 
-float length(Vec3 v) {
-    return sqrtf(
-        v.x * v.x +
-        v.y * v.y +
-        v.z * v.z
-    );
+static float length(Vec3 v) {
+    return sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
 }
 
-Vec3 normalize(Vec3 v) {
+static float length2(Vec3 v1, Vec3 v2) {
+    return length(sub(v1, v2));
+}
+
+static Vec3 normalize(Vec3 v) {
     float len = length(v);
 
     if (len == 0.0f) return (Vec3){0, 0, 0};
@@ -80,7 +80,7 @@ static Vec3 withZ(Vec3 v, float z)
     return (Vec3){ v.x, v.y, z };
 }
 
-void glVertexVec3(Vec3 v) {
+static void glVertexVec3(Vec3 v) {
     GLdouble pos[] = {v.x, v.y, v.z};
     glVertex3dv(pos);
 }
@@ -88,6 +88,11 @@ void glVertexVec3(Vec3 v) {
 static inline void glVertex3v(const Vec3* v)
 {
     glVertex3f(v->x, v->y, v->z);
+}
+
+static void glTranslatef3v(const Vec3* v)
+{
+    glTranslatef(v->x, v->y, v->z);
 }
 
 static inline void glNormal3v(const Vec3* n)
@@ -105,6 +110,33 @@ static void setTriangleNormal(const Vec3* p1, const Vec3* p2, const Vec3* p3)
     float vx = p3->x - p1->x;
     float vy = p3->y - p1->y;
     float vz = p3->z - p1->z;
+
+    float nx = uy * vz - uz * vy;
+    float ny = uz * vx - ux * vz;
+    float nz = ux * vy - uy * vx;
+
+    float len = sqrtf(nx * nx + ny * ny + nz * nz);
+    if (len > 1e-6f)
+    {
+        nx /= len;
+        ny /= len;
+        nz /= len;
+    }
+
+    glNormal3f(nx, ny, nz);
+}
+
+/* 四角形 p1 -> p2 -> p3 -> p4 の法線ベクトルを計算して設定 */
+static void setQuadNormal(const Vec3* p1, const Vec3* p2, const Vec3* p3, const Vec3* p4)
+{
+    /* 対角線1: p1 -> p3, 対角線2: p2 -> p4 */
+    float ux = p3->x - p1->x;
+    float uy = p3->y - p1->y;
+    float uz = p3->z - p1->z;
+
+    float vx = p4->x - p2->x;
+    float vy = p4->y - p2->y;
+    float vz = p4->z - p2->z;
 
     float nx = uy * vz - uz * vy;
     float ny = uz * vx - ux * vz;

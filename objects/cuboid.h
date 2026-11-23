@@ -8,4 +8,6 @@ void drawBeam(
     float thickness
 );
 
+void drawParallelogramPrism(float width, float height, float depth, float deg);
+
 #endif

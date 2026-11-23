@@ -5,6 +5,11 @@
 #include <math.h>
 #include "../vector.h"
 #include "../gl_draw.h"
+#include "../objects/cuboid.h"
+
+#ifndef PI
+#define PI 3.14159265f
+#endif
 
 typedef enum
 {
@@ -51,16 +56,16 @@ static const Vec3 VEC_G   = {   0.0f,   33.0f, 512.0f };
 static const Vec3 DG_TO_I = { -79.0f, -101.0f,  62.0f }; /* G -> I */
 static const Vec3 DG_TO_J = { -21.9f, -145.5f, 173.0f }; /* G -> J */
 
-/* F, G, I, K, J, B のベース座標テーブル（I, K, J は initControlSideVertices で計算） */
+/* F, G, I, K, J, B のベース座標テーブル（一部は initControlSidewVerticesde で定義） */
 static const Vec3 CONTROL_SIDE_BASE_VERTICES[SV_COUNT] = {
-    {   0.0f,    0.0f,   0.0f }, /* F: 前面上端・左 */
-    {   0.0f,   33.0f, 512.0f }, /* G: 上面奥辺・左 */
-    {   0.0f,    0.0f,   0.0f }, /* I: G + DG_TO_I */
-    {   0.0f,    0.0f,   0.0f }, /* K: I + calcDiToK() */
-    {   0.0f,    0.0f,   0.0f }, /* J: G + DG_TO_J */
-    {  44.0f, -172.0f, 605.0f }, /* B: 底面・左後 */
-    {   0.0f,    0.0f,   0.0f }, /* H: (J-G)*3/2 + G */
-    {   0.0f,    0.0f,   0.0f }  /* H: (J-G)*3/2 + G */
+    {    0.0f,    0.0f,   0.0f }, /* F: 前面上端・左 */
+    {    0.0f,   33.0f, 512.0f }, /* G: 上面奥辺・左 */
+    {    0.0f,    0.0f,   0.0f }, /* I: G + DG_TO_I */
+    {    0.0f,    0.0f,   0.0f }, /* K: 実行時に計算 */
+    {    0.0f,    0.0f,   0.0f }, /* J: G + DG_TO_J */
+    {   44.0f, -172.0f, 605.0f }, /* B: 底面・左後 */
+    {    0.0f,    0.0f,   0.0f }, /* L: 実行時に計算 */
+    {  -95.25f, -176.45f, 779.18f } /* M de*/
 };
 
 /* CONTROL_SIDE 用の頂点配列を組み立てる */
@@ -74,8 +79,35 @@ static void initControlSideVertices(Vec3 out[SV_COUNT])
     out[SV_I] = add(VEC_G, DG_TO_I);
     out[SV_J] = add(VEC_G, DG_TO_J);
     out[SV_K] = withY(add(out[SV_I], scale(loweFrameDir, 0.125f)), out[SV_J].y);
-    out[SV_L] = sub(scale(out[SV_J], 1.5f), scale(out[SV_G], 0.5f));
-    out[SV_M] = withX(out[SV_L], out[SV_K].x);
+    out[SV_L] = withZ(sub(scale(out[SV_J], 1.5f), scale(out[SV_G], 0.5f)), out[SV_M].z);
+}
+
+static void drawControlColumn(float s, const Vec3* v)
+{
+    Vec3 m = v[SV_M];
+    Vec3 l = v[SV_L];
+
+    /* MからLへのベクトル */
+    Vec3 dir = sub(l, m);
+
+    /* ML間の距離 */
+    float len = length(dir);
+
+    /* XY平面上の回転角 */
+    float angle = atan2f(dir.y, dir.x) * 180.0f / PI;
+
+    /* Z方向の長さ */
+    float depth = 1060.0f - m.z;
+
+    glPushMatrix();
+    glTranslatef(m.x * s, m.y * s, m.z * s);
+    glRotatef(angle, 0.0f, 0.0f, 1.0f);
+
+    /* 平行六面体を描画 */
+    glScalef(s, s, s);
+    drawParallelogramPrism(len, len, depth, 70.0f);
+
+    glPopMatrix();
 }
 
 /* F, G, I, K, J, B を通る側面図形を描画 */
@@ -91,26 +123,28 @@ static void drawControlside(float scale)
     /* 側面図形を三角形分割して描画 */
     glBegin(GL_TRIANGLES);
 
-    /* F -> G -> I */
-    drawTriangleV(&v[SV_F], &v[SV_G], &v[SV_I]);
+    /* F -> I -> G */
+    drawTriangleV(&v[SV_F], &v[SV_I], &v[SV_G]);
 
     /* I -> J -> G */
     drawTriangleV(&v[SV_I], &v[SV_J], &v[SV_G]);
 
-    /* I -> J -> K */
-    drawTriangleV(&v[SV_I], &v[SV_J], &v[SV_K]);
+    /* I -> K -> J */
+    drawTriangleV(&v[SV_I], &v[SV_K], &v[SV_J]);
 
     /* G -> L -> B */
     drawTriangleV(&v[SV_G], &v[SV_L], &v[SV_B]);
 
-    /* K -> J -> L -> M */
-    drawTriangleV(&v[SV_K], &v[SV_J], &v[SV_L]);
-    drawTriangleV(&v[SV_K], &v[SV_L], &v[SV_M]);
-    
+    /* K -> M -> L -> J */
+    drawQuadV(&v[SV_K], &v[SV_M], &v[SV_L], &v[SV_J]);
+
     glEnd();
+
+    drawControlColumn(1.0f, v);
 
     glPopMatrix();
 }
+
 
 /* ワールド座標での原点位置を指定して描画 */
 /* scale : オブジェクトの縮尺 */
