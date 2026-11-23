@@ -1,5 +1,6 @@
 #ifndef CUBOID_H
 #define CUBOID_H
+#include "../vector.h"
 
 void drawCuboid(float width, float height, float depth);
 void drawBeam(
@@ -8,6 +9,6 @@ void drawBeam(
     float thickness
 );
 
-void drawParallelogramPrism(float width, float height, float depth, float deg);
+Vec3 drawParallelogramPrism(float width, float height, float depth, float deg);
 
 #endif

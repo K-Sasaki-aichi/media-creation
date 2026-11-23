@@ -100,12 +100,7 @@ void drawCuboid(float width, float height, float depth)
 
 /* 底面（XZ平面）を deg 度傾けた平行四辺形の四角柱を描画 */
 // 左上前を原点としているので注意！！
-void drawParallelogramPrism(
-    float width,
-    float height,
-    float depth,
-    float deg
-)
+Vec3 drawParallelogramPrism(float width, float height, float depth, float deg)
 {
     const float theta = deg / 360.0f * 2.0f * PI;
     const float dx = height * cosf(theta);
@@ -182,6 +177,8 @@ void drawParallelogramPrism(
     glVertex3v(&p4);
 
     glEnd();
+
+    return (Vec3){dx + width, dy, 0.0f};
 }
 
 // 2点間を結ぶ直方体を描画する

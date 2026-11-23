@@ -34,6 +34,9 @@ typedef enum
     SV_B,
     SV_L,
     SV_M,
+    SV_N,
+    SV_P,
+    SV_Q,
     SV_COUNT
 } SideVertexId;
 
@@ -65,7 +68,10 @@ static const Vec3 CONTROL_SIDE_BASE_VERTICES[SV_COUNT] = {
     {    0.0f,    0.0f,   0.0f }, /* J: G + DG_TO_J */
     {   44.0f, -172.0f, 605.0f }, /* B: 底面・左後 */
     {    0.0f,    0.0f,   0.0f }, /* L: 実行時に計算 */
-    {  -95.25f, -176.45f, 779.18f } /* M de*/
+    { -95.25f, -176.45f, 779.18f }, /* M */
+    {    0.0f,    0.0f,   0.0f }, /* N : 実行時に計算 */
+    { -95.25f, -176.45f, 1060.0f }, /* P : Mからキャノピー中央部までz軸方向に直線 */
+    { -147.5f, -125.0f, 1060.0f } /* Q : キャノピー下部の中央部と一致 */
 };
 
 /* CONTROL_SIDE 用の頂点配列を組み立てる */
@@ -82,7 +88,7 @@ static void initControlSideVertices(Vec3 out[SV_COUNT])
     out[SV_L] = withZ(sub(scale(out[SV_J], 1.5f), scale(out[SV_G], 0.5f)), out[SV_M].z);
 }
 
-static void drawControlColumn(float s, const Vec3* v)
+static Vec3 drawControlColumn(float s, const Vec3* v)
 {
     Vec3 m = v[SV_M];
     Vec3 l = v[SV_L];
@@ -105,9 +111,15 @@ static void drawControlColumn(float s, const Vec3* v)
 
     /* 平行六面体を描画 */
     glScalef(s, s, s);
-    drawParallelogramPrism(len, len, depth, 70.0f);
+    Vec3 point = drawParallelogramPrism(len, len, depth, 70.0f);
 
     glPopMatrix();
+
+    /* 回転とスケールを反映してワールド座標に戻す */
+    point = rotateZ(point, angle);
+    point = scale(point, s);
+
+    return add(point, m);
 }
 
 /* F, G, I, K, J, B を通る側面図形を描画 */
@@ -119,6 +131,7 @@ static void drawControlside(float scale)
 
     glPushMatrix();
     glScalef(scale, scale, scale);
+    v[SV_N] = drawControlColumn(1.0f, v);
 
     /* 側面図形を三角形分割して描画 */
     glBegin(GL_TRIANGLES);
@@ -138,9 +151,13 @@ static void drawControlside(float scale)
     /* K -> M -> L -> J */
     drawQuadV(&v[SV_K], &v[SV_M], &v[SV_L], &v[SV_J]);
 
-    glEnd();
+    /* L -> N -> B */
+    drawTriangleV(&v[SV_L], &v[SV_N], &v[SV_B]);
 
-    drawControlColumn(1.0f, v);
+    /* I -> Q -> P -> M*/
+    drawQuadV(&v[SV_M], &v[SV_I], &v[SV_Q], &v[SV_P]);
+
+    glEnd();
 
     glPopMatrix();
 }

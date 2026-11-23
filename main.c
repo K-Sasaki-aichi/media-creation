@@ -10,6 +10,11 @@
 GLfloat light0pos[] = { 0.0, 3.0, 5.0, 1.0 };
 GLfloat light1pos[] = { 5.0, 3.0, 0.0, 1.0 };
 
+/* コックピット内部用の光源位置（s = 0.005f 基準の内部目安） */
+GLfloat cockpitLightPos[] = { 0.8f, 0.2f, 2.5f, 1.0f };
+GLfloat cockpitLightDiffuse[] = { 0.8f, 0.8f, 0.7f, 1.0f };
+GLfloat cockpitLightSpecular[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+
 GLfloat green[] = { 0.0, 1.0, 0.0, 1.0 };
 GLfloat red[]   = { 0.8, 0.2, 0.2, 1.0 };
 
@@ -32,23 +37,36 @@ void display(void) {
 
     /* 光源の位置設定 */
     glLightfv(GL_LIGHT0, GL_POSITION, light0pos);
-    glLightfv(GL_LIGHT1, GL_POSITION, light1pos);
-
 
     /* 視点・カメラの設定 */
     glTranslatef(-camX, -camY, -camZ);  /* 位置移動 */
     glRotatef(rotX, 1.0f, 0.0f, 0.0f);  /* 上下回転 */
     glRotatef(rotY, 0.0f, 1.0f, 0.0f);  /* 左右回転 */
 
-    float s = 0.005f;
+    /* カメラ変換後に呼ぶことで、コックピット内部の固定位置に光源を置く */
+    glLightfv(GL_LIGHT1, GL_POSITION, cockpitLightPos);
 
-    glColor3f(1, 1, 1);
+    float s = 0.005f;
+    const float mirrorCenterX = 165.0f; /* 0.0f と 330.0f の中点 */
+
+    glColor3f(0.729f, 0.737f, 0.741f);
     drawCanopy(s);
 
     // 操縦桿の中央部分
-    glColor3f(0.729f, 0.737f, 0.741f);
     drawControlCenter(s);
+
+    // 左側の側面
     drawControlside(s);
+
+    // 右側の側面（x = 165.0f を中心にX反転＋平行移動）
+    glPushMatrix();
+    glFrontFace(GL_CW);
+    glTranslatef(mirrorCenterX * s, 0.0f, 0.0f);
+    glScalef(-1.0f, 1.0f, 1.0f);
+    glTranslatef(-mirrorCenterX * s, 0.0f, 0.0f);
+    drawControlside(s);
+    glFrontFace(GL_CCW);
+    glPopMatrix();
 
     glutSwapBuffers();
 }

@@ -4,6 +4,10 @@
 #include <GL/glut.h>
 #include <math.h>
 
+#ifndef PI
+#define PI 3.14159265f
+#endif
+
 typedef struct
 {
     float x;
@@ -55,6 +59,20 @@ static float length(Vec3 v) {
 
 static float length2(Vec3 v1, Vec3 v2) {
     return length(sub(v1, v2));
+}
+
+/* ローカル座標をZ軸回りに回転 */
+static Vec3 rotateZ(Vec3 p, float angle)
+{
+    float rad = angle * PI / 180.0f;
+    float c = cosf(rad);
+    float s = sinf(rad);
+
+    return (Vec3){
+        p.x * c - p.y * s,
+        p.x * s + p.y * c,
+        p.z
+    };
 }
 
 static Vec3 normalize(Vec3 v) {
