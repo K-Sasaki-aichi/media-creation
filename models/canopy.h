@@ -4,6 +4,7 @@
 #include <GL/glut.h>
 #include "../objects/cuboid.h"
 #include "../vector.h"
+#include "../gl_draw.h"
 
 typedef enum
 {
@@ -42,6 +43,43 @@ static void drawBeamV(const Vec3* start, const Vec3* end, float thickness)
     );
 }
 
+static void drawCanopyGlass(const Vec3 v[])
+{
+    beginGlass();
+
+    // 左前面のガラス
+    glBegin(GL_TRIANGLES);
+    glVertex3v(&v[CANOPY_FRONT_L]);
+    glVertex3v(&v[CANOPY_MID_TOP_L]);
+    glVertex3v(&v[CANOPY_MID_BOT_L]);
+    glEnd();
+
+    // 右前面のガラス
+    glBegin(GL_TRIANGLES);
+    glVertex3v(&v[CANOPY_FRONT_R]);
+    glVertex3v(&v[CANOPY_MID_BOT_R]);
+    glVertex3v(&v[CANOPY_MID_TOP_R]);
+    glEnd();
+
+    // 左側面のガラス
+    glBegin(GL_QUADS);
+    glVertex3v(&v[CANOPY_MID_TOP_L]);
+    glVertex3v(&v[CANOPY_REAR_TOP_L]);
+    glVertex3v(&v[CANOPY_REAR_TIP_L]);
+    glVertex3v(&v[CANOPY_MID_BOT_L]);
+    glEnd();
+
+    // 右側面のガラス
+    glBegin(GL_QUADS);
+    glVertex3v(&v[CANOPY_MID_TOP_R]);
+    glVertex3v(&v[CANOPY_MID_BOT_R]);
+    glVertex3v(&v[CANOPY_REAR_TIP_R]);
+    glVertex3v(&v[CANOPY_REAR_TOP_R]);
+    glEnd();
+
+    endGlass();
+}
+
 static void drawCanopy(float s)
 {
     Vec3 v[CANOPY_VERTEX_COUNT];
@@ -55,6 +93,8 @@ static void drawCanopy(float s)
         v[i].y = CANOPY_BASE_VERTICES[i].y * s;
         v[i].z = CANOPY_BASE_VERTICES[i].z * s;
     }
+
+    //drawCanopyGlass(v);
 
     /* ===================================== */
     /* 2. 前方部分                           */
@@ -128,6 +168,18 @@ static void drawCanopy(float s)
     glVertex3v(&v[CANOPY_REAR_TOP_L]);
     glVertex3v(&v[CANOPY_REAR_TOP_R]);
     glVertex3v(&v[CANOPY_MID_TOP_R]);
+    glEnd();
+
+    /* ===================================== */
+    /* 9. 後方下部の天板                     */
+    /* ===================================== */
+
+    glBegin(GL_QUADS);
+    glVertex3v(&v[CANOPY_MID_BOT_L]);
+    glVertex3v(&v[CANOPY_MID_BOT_R]);
+    glVertex3v(&v[CANOPY_REAR_TIP_R]);
+    glVertex3v(&v[CANOPY_REAR_TIP_L]);
+    
     glEnd();
 }
 

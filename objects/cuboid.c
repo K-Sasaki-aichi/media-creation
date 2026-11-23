@@ -8,17 +8,6 @@
 #endif
 
 // 立方体を描く関数
-
-#include <GL/glut.h>
-#include <math.h>
-#include "cuboid.h"
-#include "../vector.h"
-
-#ifndef PI
-#define PI 3.14159265f
-#endif
-
-// 立方体を描く関数
 void drawCuboid(float width, float height, float depth)
 {
     float x = width / 2.0f;

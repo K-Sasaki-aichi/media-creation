@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "models/canopy.h"
-#include "models/control.h"
+#include "models/cockpit.h"
 #include "objects/boxframe.h"
 
 #define PI 3.14159265358979323846
@@ -47,26 +47,7 @@ void display(void) {
     glLightfv(GL_LIGHT1, GL_POSITION, cockpitLightPos);
 
     float s = 0.005f;
-    const float mirrorCenterX = 165.0f; /* 0.0f と 330.0f の中点 */
-
-    glColor3f(0.729f, 0.737f, 0.741f);
-    drawCanopy(s);
-
-    // 操縦桿の中央部分
-    drawControlCenter(s);
-
-    // 左側の側面
-    drawControlside(s);
-
-    // 右側の側面（x = 165.0f を中心にX反転＋平行移動）
-    glPushMatrix();
-    glFrontFace(GL_CW);
-    glTranslatef(mirrorCenterX * s, 0.0f, 0.0f);
-    glScalef(-1.0f, 1.0f, 1.0f);
-    glTranslatef(-mirrorCenterX * s, 0.0f, 0.0f);
-    drawControlside(s);
-    glFrontFace(GL_CCW);
-    glPopMatrix();
+    drawCockpit(s);
 
     glutSwapBuffers();
 }

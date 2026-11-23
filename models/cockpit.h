@@ -1,0 +1,343 @@
+#ifndef CONTROL_STICK_H
+#define CONTROL_STICK_H
+
+#include <GL/glut.h>
+#include <math.h>
+#include "../vector.h"
+#include "../gl_draw.h"
+#include "../objects/cuboid.h"
+#include "../objects/board.h"
+
+#ifndef PI
+#define PI 3.14159265f
+#endif
+
+typedef enum
+{
+    CV_A = 0,
+    CV_B,
+    CV_C,
+    CV_D,
+    CV_E,
+    CV_F,
+    CV_G,
+    CV_H,
+    CV_I,
+    CV_J,
+    CV_K,
+    CV_L,
+    CV_M,
+    CV_N,
+    CV_P,
+    CV_Q,
+    CV_R,
+    CV_COUNT
+} ControlVertexId;
+
+static const Vec3 CONTROL_VERTICES[CV_COUNT] = {
+    {   0.0f, -172.0f,    0.0f }, // A
+    {  44.0f, -172.0f,  605.0f }, // B
+    { 286.0f, -172.0f,  605.0f }, // C
+    { 330.0f, -172.0f,    0.0f }, // D
+    { 330.0f,    0.0f,    0.0f }, // E
+    {   0.0f,    0.0f,    0.0f }, // F
+    {   0.0f,   33.0f,  512.0f }, // G
+    { 330.0f,   33.0f,  512.0f }, // H
+    {   0.0f,    0.0f,    0.0f }, // I: 計算
+    {   0.0f,    0.0f,    0.0f }, // J: 計算
+    {   0.0f,    0.0f,    0.0f }, // K: 計算
+    {   0.0f,    0.0f,    0.0f }, // L: 計算
+    { -95.25f, -176.45f, 779.18f }, // M
+    {   0.0f,    0.0f,    0.0f }, // N: 計算
+    { -95.25f, -176.45f, 1060.0f }, // P
+    {-147.5f, -125.0f, 1060.0f },  // Q
+    { 477.5f, -125.0f, 1060.0f }  // Q
+};
+
+/* キャノピー下部に沿った方向ベクトルと基準・オフセットベクトル */
+static const Vec3 loweFrameDir = { -147.5f, -125.0f, 1060.0f };
+
+static const Vec3 VEC_G   = {   0.0f,   33.0f, 512.0f };
+static const Vec3 DG_TO_I = { -79.0f, -101.0f,  62.0f }; /* G -> I */
+static const Vec3 DG_TO_J = { -21.9f, -145.5f, 173.0f }; /* G -> J */
+
+static void drawSideWall(float height, const Vec3* v)
+{
+    Vec3 dir1 = sub(v[CV_P], v[CV_M]);
+    Vec3 dir2 = sub(v[CV_A], v[CV_N]);
+
+    Vec3 origin = { 0.0f, 0.0f, 0.0f };
+    Vec3 a = sub(v[CV_A], v[CV_N]);
+    Vec3 b = sub(v[CV_B], v[CV_N]);
+
+    glPushMatrix();
+    glTranslatef3v(&v[CV_N]);
+
+    /* 左側の板 */
+    drawSlantedPlate(dir1, height);
+
+    /* 右側の板 */
+    drawSlantedPlate(dir2, height);
+
+    /* 底面 */
+    glBegin(GL_TRIANGLES);
+    drawTriangleV(&origin, &b, &a);
+    glEnd();
+
+    glPopMatrix();
+}
+
+static void drawWall(float height, float s, const Vec3* v)
+{
+    const float mirrorCenterX = v[CV_D].x / 2.0f;
+
+    glPushMatrix();
+    glScalef(s, s, s);
+
+    /* 左側 */
+    drawSideWall(height, v);
+
+    /* 右側（左右反転） */
+    glPushMatrix();
+    glFrontFace(GL_CW);
+
+    glTranslatef(mirrorCenterX, 0.0f, 0.0f);
+    glScalef(-1.0f, 1.0f, 1.0f);
+    glTranslatef(-mirrorCenterX, 0.0f, 0.0f);
+
+    drawSideWall(height, v);
+
+    glFrontFace(GL_CCW);
+    glPopMatrix();
+
+    /* 前面の板 */
+    Vec3 dir = sub(v[CV_A], v[CV_D]);
+    glPushMatrix();
+    glTranslatef3v(&v[CV_D]);
+    drawSlantedPlate(dir, height - 75);
+    glPopMatrix();
+
+    /* 後面の板 */    
+    dir = sub(v[CV_R], v[CV_Q]);
+    glPushMatrix();
+    glTranslatef3v(&v[CV_Q]);
+    drawSlantedPlate(dir, height - 130);
+    glPopMatrix();
+
+    glPopMatrix();
+}
+
+static Vec3 drawControlColumn(float s, const Vec3* v)
+{
+    Vec3 m = v[CV_M];
+    Vec3 l = v[CV_L];
+
+    /* MからLへのベクトル */
+    Vec3 dir = sub(l, m);
+
+    /* ML間の距離 */
+    float len = length(dir);
+
+    /* XY平面上の回転角 */
+    float angle = atan2f(dir.y, dir.x) * 180.0f / PI;
+
+    /* Z方向の長さ */
+    float depth = 1060.0f - m.z;
+
+    glPushMatrix();
+    glTranslatef(m.x * s, m.y * s, m.z * s);
+    glRotatef(angle, 0.0f, 0.0f, 1.0f);
+
+    /* 平行六面体を描画 */
+    glScalef(s, s, s);
+    Vec3 point = drawParallelogramPrism(len, len, depth, 70.0f);
+
+    glPopMatrix();
+
+    /* 回転とスケールを反映してワールド座標に戻す */
+    point = rotateZ(point, angle);
+    point = scale(point, s);
+
+    return add(point, m);
+}
+
+/* scale : オブジェクトの縮尺 */
+static void drawControlside(float scale, Vec3* v)
+{
+    glPushMatrix();
+    glScalef(scale, scale, scale);
+    v[CV_N] = drawControlColumn(1.0f, v);
+
+    glBegin(GL_TRIANGLES);
+
+    drawTriangleV(&v[CV_F], &v[CV_I], &v[CV_G]);
+    drawTriangleV(&v[CV_I], &v[CV_J], &v[CV_G]);
+    drawTriangleV(&v[CV_I], &v[CV_K], &v[CV_J]);
+    drawTriangleV(&v[CV_G], &v[CV_L], &v[CV_B]);
+
+    drawQuadV(&v[CV_K], &v[CV_M], &v[CV_L], &v[CV_J]);
+
+    drawTriangleV(&v[CV_L], &v[CV_N], &v[CV_B]);
+
+    drawQuadV(&v[CV_M], &v[CV_I], &v[CV_Q], &v[CV_P]);
+
+    glEnd();
+
+    glPopMatrix();
+}
+
+
+/* ワールド座標での原点位置を指定して描画 */
+/* scale : オブジェクトの縮尺 */
+static void drawControlCenter(float scale, const Vec3* v)
+{
+    glPushMatrix();
+    glScalef(scale, scale, scale);
+
+    /* ===================================== */
+    /* A～Hの頂点で構成する立体               */
+    /* 底面・前面・上面・後面                */
+    /* ===================================== */
+    glBegin(GL_QUADS);
+
+    /* 底面: A -> D -> C -> B */
+    glNormal3f(0.0f, -1.0f, 0.0f);
+    glVertex3v(&v[CV_A]);
+    glVertex3v(&v[CV_D]);
+    glVertex3v(&v[CV_C]);
+    glVertex3v(&v[CV_B]);
+
+    /* 前面: A -> F -> E -> D */
+    glNormal3f(0.0f, 0.0f, -1.0f);
+    glVertex3v(&v[CV_A]);
+    glVertex3v(&v[CV_F]);
+    glVertex3v(&v[CV_E]);
+    glVertex3v(&v[CV_D]);
+
+    /* 上面: F -> G -> H -> E */
+    glNormal3f(0.0f, 0.9979f, -0.0644f);
+    glVertex3v(&v[CV_F]);
+    glVertex3v(&v[CV_G]);
+    glVertex3v(&v[CV_H]);
+    glVertex3v(&v[CV_E]);
+
+    /* 後面: B -> C -> H -> G */
+    glNormal3f(0.0f, 0.414f, 0.910f);
+    glVertex3v(&v[CV_B]);
+    glVertex3v(&v[CV_C]);
+    glVertex3v(&v[CV_H]);
+    glVertex3v(&v[CV_G]);
+
+    glEnd();
+
+    /* ===================================== */
+    /* 左右側面                              */
+    /* 非平面の四角形なので三角形に分割      */
+    /* ===================================== */
+    glBegin(GL_TRIANGLES);
+
+    /* 左側面 1: A -> B -> G */
+    glNormal3f(-0.981f, -0.177f, 0.071f);
+    glVertex3v(&v[CV_A]);
+    glVertex3v(&v[CV_B]);
+    glVertex3v(&v[CV_G]);
+
+    /* 左側面 2: A -> G -> F */
+    glNormal3f(-1.0f, 0.0f, 0.0f);
+    glVertex3v(&v[CV_A]);
+    glVertex3v(&v[CV_G]);
+    glVertex3v(&v[CV_F]);
+
+    /* 右側面 1: D -> E -> H */
+    glNormal3f(1.0f, 0.0f, 0.0f);
+    glVertex3v(&v[CV_D]);
+    glVertex3v(&v[CV_E]);
+    glVertex3v(&v[CV_H]);
+
+    /* 右側面 2: D -> H -> C */
+    glNormal3f(0.981f, -0.177f, 0.071f);
+    glVertex3v(&v[CV_D]);
+    glVertex3v(&v[CV_H]);
+    glVertex3v(&v[CV_C]);
+
+    glEnd();
+
+    glPopMatrix();
+}
+
+/* コックピット下部に床板を描画 */
+static void drawFloor(float floorY, float s)
+{
+    Vec3 p1 = { -250.0f, floorY, -100.0f };
+    Vec3 p2 = { -250.0f, floorY, 1400.0f };
+    Vec3 p3 = {  580.0f, floorY, 1400.0f };
+    Vec3 p4 = {  580.0f, floorY, -100.0f };
+
+    glPushMatrix();
+    glScalef(s, s, s);
+
+    glBegin(GL_QUADS);
+    glNormal3f(0.0f, 1.0f, 0.0f);
+    glVertex3v(&p1);
+    glVertex3v(&p2);
+    glVertex3v(&p3);
+    glVertex3v(&p4);
+    glEnd();
+
+    glPopMatrix();
+}
+
+static void initControlVertices(Vec3 out[CV_COUNT])
+{
+    int i;
+
+    for (i = 0; i < CV_COUNT; i++)
+    {
+        out[i] = CONTROL_VERTICES[i];
+    }
+
+    out[CV_I] = add(out[CV_G], DG_TO_I);
+    out[CV_J] = add(out[CV_G], DG_TO_J);
+
+    out[CV_K] = withY(
+        add(out[CV_I], scale(loweFrameDir, 0.125f)),
+        out[CV_J].y
+    );
+
+    out[CV_L] = withZ(
+        sub(scale(out[CV_J], 1.5f),scale(out[CV_G], 0.5f)),
+        out[CV_M].z
+    );
+}
+
+static void drawCockpit(float s){
+    Vec3 v[CV_COUNT];
+    initControlVertices(v);
+
+    const float mirrorCenterX = 165.0f; /* 0.0f と 330.0f の中点 */
+
+    glColor3f(0.729f, 0.737f, 0.741f);
+    drawCanopy(s);
+
+    // 操縦桿の中央部分
+    drawControlCenter(s, v);
+
+    // 左側の側面
+    drawControlside(s, v);
+
+    // 右側の側面（x = 165.0f を中心にX反転＋平行移動）
+    glPushMatrix();
+    glFrontFace(GL_CW);
+    glTranslatef(mirrorCenterX * s, 0.0f, 0.0f);
+    glScalef(-1.0f, 1.0f, 1.0f);
+    glTranslatef(-mirrorCenterX * s, 0.0f, 0.0f);
+    drawControlside(s, v);
+    glFrontFace(GL_CCW);
+    glPopMatrix();
+
+    drawWall(-70, s, v);
+
+    drawFloor(-316.89f, s);
+}
+
+#endif
