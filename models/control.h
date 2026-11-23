@@ -4,6 +4,7 @@
 #include <GL/glut.h>
 #include <math.h>
 #include "../vector.h"
+#include "../gl_draw.h"
 
 typedef enum
 {
@@ -15,20 +16,50 @@ typedef enum
     V_F,
     V_G,
     V_H,
+    V_I,
+    V_J,
     V_COUNT
 } VertexId;
 
-/* A～H の頂点座標テーブル */
+/* A～J の頂点座標テーブル */
 static const Vec3 CONTROL_CENTER_VERTICES[V_COUNT] = {
-    {   0.0f, -172.7f,   0.0f }, /* A: 底面・左前 */
-    {  44.0f, -172.7f, 605.0f }, /* B: 底面・左後 */
-    { 286.0f, -172.7f, 605.0f }, /* C: 底面・右後 */
-    { 330.0f, -172.7f,   0.0f }, /* D: 底面・右前 */
+    {   0.0f, -172.0f,   0.0f }, /* A: 底面・左前 */
+    {  44.0f, -172.0f, 605.0f }, /* B: 底面・左後 */
+    { 286.0f, -172.0f, 605.0f }, /* C: 底面・右後 */
+    { 330.0f, -172.0f,   0.0f }, /* D: 底面・右前 */
     { 330.0f,    0.0f,   0.0f }, /* E: 前面上端・右 */
     {   0.0f,    0.0f,   0.0f }, /* F: 前面上端・左 */
-    {   0.0f,   33.0f, 511.5f }, /* G: 上面奥辺・左 */
-    { 330.0f,   33.0f, 511.5f }  /* H: 上面奥辺・右 */
+    {   0.0f,   33.0f, 512.0f }, /* G: 上面奥辺・左 */
+    { 330.0f,   33.0f, 512.0f }, /* H: 上面奥辺・右 */
+    { -79.0f,  -68.0f, 574.0f }, /* I */
+    { -21.9f, -112.5f, 685.0f }  /* J */
 };
+
+/* F, G, I, J, B を通る側面図形を描画 */
+/* scale : オブジェクトの縮尺 */
+static void drawControlside(float scale)
+{
+    const Vec3* v = CONTROL_CENTER_VERTICES;
+
+    glPushMatrix();
+    glScalef(scale, scale, scale);
+
+    /* 5頂点(F -> G -> I -> J -> B)を三角形分割して描画 */
+    glBegin(GL_TRIANGLES);
+
+    /* F -> G -> I */
+    drawTriangleV(&v[V_F], &v[V_G], &v[V_I]);
+
+    /* F -> I -> J */
+    drawTriangleV(&v[V_F], &v[V_I], &v[V_J]);
+
+    /* F -> J -> B */
+    drawTriangleV(&v[V_F], &v[V_J], &v[V_B]);
+
+    glEnd();
+
+    glPopMatrix();
+}
 
 /* ワールド座標での原点位置を指定して描画 */
 /* scale : オブジェクトの縮尺 */

@@ -45,11 +45,10 @@ void display(void) {
     drawCanopy(s);
 
     // 操縦桿の中央部分
-    glPushMatrix();
-    glTranslatef(-165.0f * s, 125.0f * s, -1060.0f * s);
     glColor3f(0.65f, 0.68f, 0.72f);
     drawControlCenter(s);
-    glPopMatrix();
+    glColor3f(1, 0,0);
+    drawControlside(s);
 
     // 操縦桿の左側部分
     // glPushMatrix();
