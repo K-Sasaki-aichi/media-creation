@@ -20,19 +20,6 @@ typedef enum
     CANOPY_VERTEX_COUNT
 } CanopyVertexId;
 
-/* 基準寸法（s = 1.0）の頂点座標テーブル */
-// static const Vec3 CANOPY_BASE_VERTICES[CANOPY_VERTEX_COUNT] = {
-//     { -165.0f, 125.0f, -1060.0f }, /* CANOPY_FRONT_L: 前方頂点・左 */
-//     {  165.0f, 125.0f, -1060.0f }, /* CANOPY_FRONT_R: 前方頂点・右 */
-//     { -235.0f, 330.0f,     0.0f }, /* CANOPY_MID_TOP_L: 中央断面・上端・左 */
-//     {  235.0f, 330.0f,     0.0f }, /* CANOPY_MID_TOP_R: 中央断面・上端・右 */
-//     { -312.5f,   0.0f,     0.0f }, /* CANOPY_MID_BOT_L: 中央断面・下端・左 */
-//     {  312.5f,   0.0f,     0.0f }, /* CANOPY_MID_BOT_R: 中央断面・下端・右 */
-//     { -210.0f, 330.0f,   203.0f }, /* CANOPY_REAR_TOP_L: 後方天板終端・左 */
-//     {  210.0f, 330.0f,   203.0f }, /* CANOPY_REAR_TOP_R: 後方天板終端・右 */
-//     { -210.0f, 240.0f,   310.0f }, /* CANOPY_REAR_TIP_L: 後方尖端・左 */
-//     {  210.0f, 240.0f,   310.0f }  /* CANOPY_REAR_TIP_R: 後方尖端・右 */
-// };
 static const Vec3 CANOPY_BASE_VERTICES[CANOPY_VERTEX_COUNT] = {
     {    0.0f,    0.0f,    0.0f }, /* CANOPY_FRONT_L: 前方頂点・左（原点） */
     {  330.0f,    0.0f,    0.0f }, /* CANOPY_FRONT_R: 前方頂点・右 */

@@ -16,13 +16,24 @@ typedef enum
     V_F,
     V_G,
     V_H,
-    V_I,
-    V_J,
-    V_COUNT
-} VertexId;
+    V_CENTER_COUNT
+} CenterVertexId;
 
-/* A～J の頂点座標テーブル */
-static const Vec3 CONTROL_CENTER_VERTICES[V_COUNT] = {
+typedef enum
+{
+    SV_F = 0,
+    SV_G,
+    SV_I,
+    SV_K,
+    SV_J,
+    SV_B,
+    SV_L,
+    SV_M,
+    SV_COUNT
+} SideVertexId;
+
+/* A～H の頂点座標テーブル */
+static const Vec3 CONTROL_CENTER_VERTICES[V_CENTER_COUNT] = {
     {   0.0f, -172.0f,   0.0f }, /* A: 底面・左前 */
     {  44.0f, -172.0f, 605.0f }, /* B: 底面・左後 */
     { 286.0f, -172.0f, 605.0f }, /* C: 底面・右後 */
@@ -30,32 +41,72 @@ static const Vec3 CONTROL_CENTER_VERTICES[V_COUNT] = {
     { 330.0f,    0.0f,   0.0f }, /* E: 前面上端・右 */
     {   0.0f,    0.0f,   0.0f }, /* F: 前面上端・左 */
     {   0.0f,   33.0f, 512.0f }, /* G: 上面奥辺・左 */
-    { 330.0f,   33.0f, 512.0f }, /* H: 上面奥辺・右 */
-    { -79.0f,  -68.0f, 574.0f }, /* I */
-    { -21.9f, -112.5f, 685.0f }  /* J */
+    { 330.0f,   33.0f, 512.0f }  /* H: 上面奥辺・右 */
 };
 
-/* F, G, I, J, B を通る側面図形を描画 */
+/* キャノピー下部に沿った方向ベクトルと基準・オフセットベクトル */
+static const Vec3 loweFrameDir = { -147.5f, -125.0f, 1060.0f };
+
+static const Vec3 VEC_G   = {   0.0f,   33.0f, 512.0f };
+static const Vec3 DG_TO_I = { -79.0f, -101.0f,  62.0f }; /* G -> I */
+static const Vec3 DG_TO_J = { -21.9f, -145.5f, 173.0f }; /* G -> J */
+
+/* F, G, I, K, J, B のベース座標テーブル（I, K, J は initControlSideVertices で計算） */
+static const Vec3 CONTROL_SIDE_BASE_VERTICES[SV_COUNT] = {
+    {   0.0f,    0.0f,   0.0f }, /* F: 前面上端・左 */
+    {   0.0f,   33.0f, 512.0f }, /* G: 上面奥辺・左 */
+    {   0.0f,    0.0f,   0.0f }, /* I: G + DG_TO_I */
+    {   0.0f,    0.0f,   0.0f }, /* K: I + calcDiToK() */
+    {   0.0f,    0.0f,   0.0f }, /* J: G + DG_TO_J */
+    {  44.0f, -172.0f, 605.0f }, /* B: 底面・左後 */
+    {   0.0f,    0.0f,   0.0f }, /* H: (J-G)*3/2 + G */
+    {   0.0f,    0.0f,   0.0f }  /* H: (J-G)*3/2 + G */
+};
+
+/* CONTROL_SIDE 用の頂点配列を組み立てる */
+static void initControlSideVertices(Vec3 out[SV_COUNT])
+{
+    int i;
+    for (i = 0; i < SV_COUNT; i++)
+    {
+        out[i] = CONTROL_SIDE_BASE_VERTICES[i];
+    }
+    out[SV_I] = add(VEC_G, DG_TO_I);
+    out[SV_J] = add(VEC_G, DG_TO_J);
+    out[SV_K] = withY(add(out[SV_I], scale(loweFrameDir, 0.125f)), out[SV_J].y);
+    out[SV_L] = sub(scale(out[SV_J], 1.5f), scale(out[SV_G], 0.5f));
+    out[SV_M] = withX(out[SV_L], out[SV_K].x);
+}
+
+/* F, G, I, K, J, B を通る側面図形を描画 */
 /* scale : オブジェクトの縮尺 */
 static void drawControlside(float scale)
 {
-    const Vec3* v = CONTROL_CENTER_VERTICES;
+    Vec3 v[SV_COUNT];
+    initControlSideVertices(v);
 
     glPushMatrix();
     glScalef(scale, scale, scale);
 
-    /* 5頂点(F -> G -> I -> J -> B)を三角形分割して描画 */
+    /* 側面図形を三角形分割して描画 */
     glBegin(GL_TRIANGLES);
 
     /* F -> G -> I */
-    drawTriangleV(&v[V_F], &v[V_G], &v[V_I]);
+    drawTriangleV(&v[SV_F], &v[SV_G], &v[SV_I]);
 
-    /* F -> I -> J */
-    drawTriangleV(&v[V_F], &v[V_I], &v[V_J]);
+    /* I -> J -> G */
+    drawTriangleV(&v[SV_I], &v[SV_J], &v[SV_G]);
 
-    /* F -> J -> B */
-    drawTriangleV(&v[V_F], &v[V_J], &v[V_B]);
+    /* I -> J -> K */
+    drawTriangleV(&v[SV_I], &v[SV_J], &v[SV_K]);
 
+    /* G -> L -> B */
+    drawTriangleV(&v[SV_G], &v[SV_L], &v[SV_B]);
+
+    /* K -> J -> L -> M */
+    drawTriangleV(&v[SV_K], &v[SV_J], &v[SV_L]);
+    drawTriangleV(&v[SV_K], &v[SV_L], &v[SV_M]);
+    
     glEnd();
 
     glPopMatrix();

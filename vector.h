@@ -65,6 +65,21 @@ Vec3 normalize(Vec3 v) {
     return scale(v, 1.0f / len);
 }
 
+static Vec3 withX(Vec3 v, float x)
+{
+    return (Vec3){ x, v.y, v.z };
+}
+
+static Vec3 withY(Vec3 v, float y)
+{
+    return (Vec3){ v.x, y, v.z };
+}
+
+static Vec3 withZ(Vec3 v, float z)
+{
+    return (Vec3){ v.x, v.y, z };
+}
+
 void glVertexVec3(Vec3 v) {
     GLdouble pos[] = {v.x, v.y, v.z};
     glVertex3dv(pos);
