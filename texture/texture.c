@@ -12,6 +12,8 @@ GLuint texid_sideout0 = 0;
 GLuint texid_sideout1 = 0;
 GLuint texid_sideout2 = 0;
 GLuint texid_column = 0;
+GLuint texid_glass = 0;
+GLuint texid_plate = 0;
 
 // 指定された画像ファイルをロードする関数
 GLuint loadTexture(const char* filename)
@@ -104,5 +106,13 @@ void initTextures(void)
 
     texid_column = loadTexture(
         "texture/textures/side_column.raw"
+    );
+
+    texid_glass = loadTexture(
+        "texture/textures/glass.raw"
+    );
+
+    texid_plate = loadTexture(
+        "texture/textures/plate.raw"
     );
 }

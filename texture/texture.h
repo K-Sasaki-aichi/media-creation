@@ -10,6 +10,8 @@ extern GLuint texid_sideout0;
 extern GLuint texid_sideout1;
 extern GLuint texid_sideout2;
 extern GLuint texid_column;
+extern GLuint texid_glass;
+extern GLuint texid_plate;
 extern GLuint texid_body;
 extern GLuint texid_engine;
 

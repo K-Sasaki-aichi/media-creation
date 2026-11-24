@@ -316,13 +316,15 @@ static void drawControlPanel(const Vec3* v)
 
 /* ワールド座標での原点位置を指定して描画 */
 /* scale : オブジェクトの縮尺 */
+/* ワールド座標での原点位置を指定して描画 */
+/* scale : オブジェクトの縮尺 */
 static void drawControlCenter(float scale, const Vec3* v)
 {
     glPushMatrix();
     glScalef(scale, scale, scale);
 
     /* ===================================== */
-    /* 底面・前面・上面                      */
+    /* 底面・前面                            */
     /* ===================================== */
     glBegin(GL_QUADS);
 
@@ -340,14 +342,35 @@ static void drawControlCenter(float scale, const Vec3* v)
     glVertex3v(&v[CV_E]);
     glVertex3v(&v[CV_D]);
 
-    /* 上面: F -> G -> H -> E */
+    glEnd();
+
+    /* ===================================== */
+    /* 上面: F -> G -> H -> E（テクスチャ貼付） */
+    /* ===================================== */
+    glColor3f(1.0f, 1.0f, 1.0f);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texid_plate);
+
+    glBegin(GL_QUADS);
+
     glNormal3f(0.0f, 0.9979f, -0.0644f);
+
+    glTexCoord2f(0.0f, 0.0f);
     glVertex3v(&v[CV_F]);
+
+    glTexCoord2f(0.0f, 1.0f);
     glVertex3v(&v[CV_G]);
+
+    glTexCoord2f(1.0f, 1.0f);
     glVertex3v(&v[CV_H]);
+
+    glTexCoord2f(1.0f, 0.0f);
     glVertex3v(&v[CV_E]);
 
     glEnd();
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_TEXTURE_2D);
 
     /* ===================================== */
     /* 左右側面                              */
@@ -436,7 +459,7 @@ static void drawCockpit(float s){
 
     const float mirrorCenterX = 165.0f; /* 0.0f と 330.0f の中点 */
 
-    glColor3f(0.153f, 0.153f, 0.149f);
+    glColor3f(0.1f, 0.1f, 0.1f);
     drawCanopy(s);
 
     // 操縦桿の中央部分

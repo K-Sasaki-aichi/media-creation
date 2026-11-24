@@ -80,7 +80,7 @@ static void drawCanopyGlass(const Vec3 v[])
         &v[CANOPY_FRONT_R],
         &v[CANOPY_MID_TOP_R],
         &v[CANOPY_MID_TOP_L],
-        edge_alpha*1.5,
+        edge_alpha*1.6,
         center_alpha
     );
 

@@ -19,13 +19,13 @@ GLfloat green[] = { 0.0, 1.0, 0.0, 1.0 };
 GLfloat red[]   = { 0.8, 0.2, 0.2, 1.0 };
 
 /* --- 視点と移動のための変数 --- */
-// パイロットの頭の位置
-float camX = 0.0f;
-float camY = 0.0f;
-float camZ = 0.0f;
+// パイロットの頭の位置（コックピット中央・やや後方）
+float camX = 0.825f;
+float camY = 0.35f;
+float camZ = 5.2f;
 
-// 視線の角度
-float rotX = 0.0f;
+// 視線の角度（0, 0 で -Z 方向＝前方。rotX を少しプラスにするとやや下向き）
+float rotX = 12.0f;
 float rotY = 0.0f;
 
 int isDragging = 0;
