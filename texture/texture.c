@@ -7,6 +7,11 @@
 
 GLuint texid_canopy = 0;
 GLuint texid_control_center0 = 0;
+GLuint texid_sidein = 0;
+GLuint texid_sideout0 = 0;
+GLuint texid_sideout1 = 0;
+GLuint texid_sideout2 = 0;
+GLuint texid_column = 0;
 
 // 指定された画像ファイルをロードする関数
 GLuint loadTexture(const char* filename)
@@ -81,11 +86,23 @@ void initTextures(void)
         "texture/textures/center0.raw"
     );
 
-    // texid_body = loadTexture(
-    //     "texture/textures/body_metal.raw"
-    // );
+    texid_sidein = loadTexture(
+        "texture/textures/side_in.raw"
+    );
 
-    // texid_engine = loadTexture(
-    //     "texture/textures/engine_metal.raw"
-    // );
+    texid_sideout0 = loadTexture(
+        "texture/textures/side_out0.raw"
+    );
+
+    texid_sideout1 = loadTexture(
+        "texture/textures/side_out1.raw"
+    );
+
+    texid_sideout2 = loadTexture(
+        "texture/textures/side_out2.raw"
+    );
+
+    texid_column = loadTexture(
+        "texture/textures/side_column.raw"
+    );
 }

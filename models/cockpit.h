@@ -163,24 +163,117 @@ static Vec3 drawControlColumn(float s, const Vec3* v)
 }
 
 /* scale : オブジェクトの縮尺 */
+/* scale : オブジェクトの縮尺 */
 static void drawControlside(float scale, Vec3* v)
 {
     glPushMatrix();
     glScalef(scale, scale, scale);
+
     v[CV_N] = drawControlColumn(1.0f, v);
 
+    /* 上部 */
     glBegin(GL_TRIANGLES);
 
     drawTriangleV(&v[CV_F], &v[CV_I], &v[CV_G]);
-    drawTriangleV(&v[CV_I], &v[CV_J], &v[CV_G]);
-    drawTriangleV(&v[CV_I], &v[CV_K], &v[CV_J]);
-    drawTriangleV(&v[CV_G], &v[CV_L], &v[CV_B]);
 
-    drawQuadV(&v[CV_K], &v[CV_M], &v[CV_L], &v[CV_J]);
+    glEnd();
 
-    drawTriangleV(&v[CV_L], &v[CV_N], &v[CV_B]);
+    /* 上部の一部（I -> K -> J）に texid_sideout1 を貼付 */
+    glColor3f(1.0f, 1.0f, 1.0f);
 
-    drawQuadV(&v[CV_M], &v[CV_I], &v[CV_Q], &v[CV_P]);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texid_sideout1);
+
+    glBegin(GL_TRIANGLES);
+
+    drawTexturedTriangleUV(
+        &v[CV_I], 0.0f,         1.0f,
+        &v[CV_K], 145.0f/309.0f, 0.0f,
+        &v[CV_J], 1.0f,         1.0f
+    );
+
+    glEnd();
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_TEXTURE_2D);
+
+    /* 上部の一部（I -> J -> G）に texid_sideout0 を貼付 */
+    glColor3f(1.0f, 1.0f, 1.0f);
+
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texid_sideout0);
+
+    glBegin(GL_TRIANGLES);
+
+    drawTexturedTriangleUV(
+        &v[CV_I], 0.0f,         1.0f,
+        &v[CV_J], 1.0f,         1.0f,
+        &v[CV_G], 76.0f/256.0f, 0.0f
+    );
+
+    glEnd();
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_TEXTURE_2D);
+
+    /* side in */
+    glColor3f(1.0f, 1.0f, 1.0f);
+
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texid_sidein);
+
+    glBegin(GL_TRIANGLES);
+
+    drawTexturedTriangleUV(
+        &v[CV_G], 0.0f,          0.0f,
+        &v[CV_L], 540.0f/590.0f, 373.0f/526.0f,
+        &v[CV_B], 96.0f/590.0f,  1.0f
+    );
+
+    drawTexturedTriangleUV(
+        &v[CV_L], 540.0f/590.0f, 373.0f/526.0f,
+        &v[CV_N], 1.0f,          1.0f,
+        &v[CV_B], 96.0f/590.0f,  1.0f
+    );
+
+    glEnd();
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_TEXTURE_2D);
+
+    /* 下部（K -> M -> L, K -> J -> L）に texid_sideout2 を貼付 */
+    glColor3f(1.0f, 1.0f, 1.0f);
+
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texid_sideout2);
+
+    glBegin(GL_TRIANGLES);
+
+    /* 三角形1: K(0,0) -> M(1,0) -> L(1,1) */
+    drawTexturedTriangleUV(
+        &v[CV_K], 1.0f, 0.0f,
+        &v[CV_M], 1.0f, 1.0f,
+        &v[CV_L], 0.0f, 1.0f
+    );
+
+    /* 三角形2: K(0,0) -> J(0,1) -> L(1,1) */
+    drawTexturedTriangleUV(
+        &v[CV_K], 1.0f, 0.0f,
+        &v[CV_J], 0.0f, 0.0f,
+        &v[CV_L], 0.0f, 1.0f
+    );
+
+    glEnd();
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_TEXTURE_2D);
+
+    /* 側面 */
+    glBegin(GL_TRIANGLES);
+    glColor3f(0.443f, 0.447f, 0.443f);
+    //drawQuadV(&v[CV_M], &v[CV_I], &v[CV_Q], &v[CV_P]);
+    drawTriangleV(&v[CV_M], &v[CV_I], &v[CV_Q]);
+    drawTriangleV(&v[CV_M], &v[CV_Q], &v[CV_P]);
 
     glEnd();
 
@@ -255,40 +348,6 @@ static void drawControlCenter(float scale, const Vec3* v)
     glVertex3v(&v[CV_E]);
 
     glEnd();
-
-    /* ===================================== */
-    /* 後面
-    /* ===================================== */
-    // glEnable(GL_TEXTURE_2D);
-
-    // glBegin(GL_TRIANGLES);
-
-    // glNormal3f(0.0f, 0.414f, 0.910f);
-
-    // /* 三角形1 */
-    // glTexCoord2f(0.0f, 1.0f);
-    // glVertex3v(&v[CV_B]);
-
-    // glTexCoord2f(1.0f, 1.0f);
-    // glVertex3v(&v[CV_C]);
-
-    // glTexCoord2f(1.0f, 0.0f);
-    // glVertex3v(&v[CV_H]);
-
-    // /* 三角形2 */
-    // glTexCoord2f(0.0f, 1.0f);
-    // glVertex3v(&v[CV_B]);
-
-    // glTexCoord2f(1.0f, 0.0f);
-    // glVertex3v(&v[CV_H]);
-
-    // glTexCoord2f(0.0f, 0.0f);
-    // glVertex3v(&v[CV_G]);
-
-    // glEnd();
-
-    // glBindTexture(GL_TEXTURE_2D, 0);
-    // glDisable(GL_TEXTURE_2D);
 
     /* ===================================== */
     /* 左右側面                              */
@@ -377,7 +436,7 @@ static void drawCockpit(float s){
 
     const float mirrorCenterX = 165.0f; /* 0.0f と 330.0f の中点 */
 
-    glColor3f(0.729f, 0.737f, 0.741f);
+    glColor3f(0.153f, 0.153f, 0.149f);
     drawCanopy(s);
 
     // 操縦桿の中央部分
@@ -396,6 +455,7 @@ static void drawCockpit(float s){
     glFrontFace(GL_CCW);
     glPopMatrix();
 
+    glColor3f(0.153f, 0.153f, 0.149f);
     drawWall(-70, s, v);
 
     drawFloor(-316.89f, s);

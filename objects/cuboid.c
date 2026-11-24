@@ -2,6 +2,9 @@
 #include <math.h>
 #include "cuboid.h"
 #include "../vector.h"
+#include "../texture/texture.h"
+
+#include <stdio.h>
 
 #ifndef PI
 #define PI 3.14159265f
@@ -165,6 +168,8 @@ void drawTexturedCuboid(float width, float height, float depth, GLuint textureID
 
 /* 底面（XZ平面）を deg 度傾けた平行四辺形の四角柱を描画 */
 // 左上前を原点としているので注意！！
+/* 底面（XZ平面）を deg 度傾けた平行四辺形の四角柱を描画 */
+// 左上前を原点としているので注意！！
 Vec3 drawParallelogramPrism(float width, float height, float depth, float deg)
 {
     const float theta = deg / 360.0f * 2.0f * PI;
@@ -173,57 +178,99 @@ Vec3 drawParallelogramPrism(float width, float height, float depth, float deg)
 
     Vec3 p1, p2, p3, p4;
 
-    glBegin(GL_QUADS);
-
-    // 前面 (z = 0)
+    /* ===== 前面 ===== */
     p1 = (Vec3){0.0f, 0.0f, 0.0f};
     p2 = (Vec3){dx, dy, 0.0f};
     p3 = (Vec3){dx + width, dy, 0.0f};
     p4 = (Vec3){width, 0.0f, 0.0f};
-    setQuadNormal(&p1, &p2, &p3, &p4);
-    glVertex3v(&p1); glVertex3v(&p2); glVertex3v(&p3); glVertex3v(&p4);
 
-    // 背面 (z = depth)
+    glBegin(GL_QUADS);
+
+    setQuadNormal(&p1, &p2, &p3, &p4);
+
+    glVertex3v(&p1);
+    glVertex3v(&p2);
+    glVertex3v(&p3);
+    glVertex3v(&p4);
+
+    /* ===== 背面 ===== */
     p1 = (Vec3){width, 0.0f, depth};
     p2 = (Vec3){dx + width, dy, depth};
     p3 = (Vec3){dx, dy, depth};
     p4 = (Vec3){0.0f, 0.0f, depth};
-    setQuadNormal(&p1, &p2, &p3, &p4);
-    glVertex3v(&p1); glVertex3v(&p2); glVertex3v(&p3); glVertex3v(&p4);
 
-    // 左面
+    setQuadNormal(&p1, &p2, &p3, &p4);
+
+    glVertex3v(&p1);
+    glVertex3v(&p2);
+    glVertex3v(&p3);
+    glVertex3v(&p4);
+
+    /* ===== 左面 ===== */
     p1 = (Vec3){0.0f, 0.0f, depth};
     p2 = (Vec3){dx, dy, depth};
     p3 = (Vec3){dx, dy, 0.0f};
     p4 = (Vec3){0.0f, 0.0f, 0.0f};
-    setQuadNormal(&p1, &p2, &p3, &p4);
-    glVertex3v(&p1); glVertex3v(&p2); glVertex3v(&p3); glVertex3v(&p4);
 
-    // 右面
+    setQuadNormal(&p1, &p2, &p3, &p4);
+
+    glVertex3v(&p1);
+    glVertex3v(&p2);
+    glVertex3v(&p3);
+    glVertex3v(&p4);
+
+    /* ===== 右面 ===== */
     p1 = (Vec3){dx + width, dy, depth};
     p2 = (Vec3){width, 0.0f, depth};
     p3 = (Vec3){width, 0.0f, 0.0f};
     p4 = (Vec3){dx + width, dy, 0.0f};
-    setQuadNormal(&p1, &p2, &p3, &p4);
-    glVertex3v(&p1); glVertex3v(&p2); glVertex3v(&p3); glVertex3v(&p4);
 
-    // 上面（傾き側）
+    setQuadNormal(&p1, &p2, &p3, &p4);
+
+    glVertex3v(&p1);
+    glVertex3v(&p2);
+    glVertex3v(&p3);
+    glVertex3v(&p4);
+
+    /* ===== 上面（テクスチャ） ===== */
     p1 = (Vec3){dx, dy, depth};
     p2 = (Vec3){dx + width, dy, depth};
     p3 = (Vec3){dx + width, dy, 0.0f};
     p4 = (Vec3){dx, dy, 0.0f};
-    setQuadNormal(&p1, &p2, &p3, &p4);
-    glVertex3v(&p1); glVertex3v(&p2); glVertex3v(&p3); glVertex3v(&p4);
 
-    // 底面（基準辺側）
+    setQuadNormal(&p1, &p2, &p3, &p4);
+
+    glVertex3v(&p1);
+    glVertex3v(&p2);
+    glVertex3v(&p3);
+    glVertex3v(&p4);
+
+    glEnd();
+
+    /* ===== 底面 ===== */
     p1 = (Vec3){0.0f, 0.0f, 0.0f};
     p2 = (Vec3){width, 0.0f, 0.0f};
     p3 = (Vec3){width, 0.0f, depth};
     p4 = (Vec3){0.0f, 0.0f, depth};
+
     setQuadNormal(&p1, &p2, &p3, &p4);
-    glVertex3v(&p1); glVertex3v(&p2); glVertex3v(&p3); glVertex3v(&p4);
+
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texid_column);
+
+    glBegin(GL_QUADS);
+
+    setQuadNormal(&p1, &p2, &p3, &p4);
+
+    glTexCoord2f(0.0f,            0.0f);            glVertex3v(&p1);
+    glTexCoord2f(3.0f / 148.0f,   493.0f / 502.0f); glVertex3v(&p2);
+    glTexCoord2f(1.0f,            1.0f);            glVertex3v(&p3);
+    glTexCoord2f(137.0f / 148.0f, 14.0f / 502.0f);  glVertex3v(&p4);
 
     glEnd();
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_TEXTURE_2D);
 
     return (Vec3){dx + width, dy, 0.0f};
 }
