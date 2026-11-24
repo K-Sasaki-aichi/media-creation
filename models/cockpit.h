@@ -7,6 +7,7 @@
 #include "../gl_draw.h"
 #include "../objects/cuboid.h"
 #include "../objects/board.h"
+#include "../texture/texture.h"
 
 #ifndef PI
 #define PI 3.14159265f
@@ -36,8 +37,8 @@ typedef enum
 
 static const Vec3 CONTROL_VERTICES[CV_COUNT] = {
     {   0.0f, -172.0f,    0.0f }, // A
-    {  44.0f, -172.0f,  605.0f }, // B
-    { 286.0f, -172.0f,  605.0f }, // C
+    {  58.0f, -172.0f,  605.0f }, // B
+    { 272.0f, -172.0f,  605.0f }, // C
     { 330.0f, -172.0f,    0.0f }, // D
     { 330.0f,    0.0f,    0.0f }, // E
     {   0.0f,    0.0f,    0.0f }, // F
@@ -186,6 +187,39 @@ static void drawControlside(float scale, Vec3* v)
     glPopMatrix();
 }
 
+static void drawControlPanel(const Vec3* v)
+{
+    Vec3 p1 = v[CV_G];
+    Vec3 p2 = add(withX(v[CV_B], p1.x), (Vec3){-8.0f, 0, 0});
+
+    Vec3 p4 = v[CV_H];
+    Vec3 p3 = withX(v[CV_C], p4.x);
+    
+
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texid_control_center0);
+
+    glBegin(GL_QUADS);
+
+    glNormal3f(0.0f, 0.0f, 1.0f);
+
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3v(&p1);
+
+    glTexCoord2f(0.0f, 1.0f);
+    glVertex3v(&p2);
+
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex3v(&p3);
+
+    glTexCoord2f(1.0f, 0.0f);
+    glVertex3v(&p4);
+
+    glEnd();
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_TEXTURE_2D);
+}
 
 /* ワールド座標での原点位置を指定して描画 */
 /* scale : オブジェクトの縮尺 */
@@ -195,8 +229,7 @@ static void drawControlCenter(float scale, const Vec3* v)
     glScalef(scale, scale, scale);
 
     /* ===================================== */
-    /* A～Hの頂点で構成する立体               */
-    /* 底面・前面・上面・後面                */
+    /* 底面・前面・上面                      */
     /* ===================================== */
     glBegin(GL_QUADS);
 
@@ -221,46 +254,74 @@ static void drawControlCenter(float scale, const Vec3* v)
     glVertex3v(&v[CV_H]);
     glVertex3v(&v[CV_E]);
 
-    /* 後面: B -> C -> H -> G */
-    glNormal3f(0.0f, 0.414f, 0.910f);
-    glVertex3v(&v[CV_B]);
-    glVertex3v(&v[CV_C]);
-    glVertex3v(&v[CV_H]);
-    glVertex3v(&v[CV_G]);
-
     glEnd();
 
     /* ===================================== */
+    /* 後面
+    /* ===================================== */
+    // glEnable(GL_TEXTURE_2D);
+
+    // glBegin(GL_TRIANGLES);
+
+    // glNormal3f(0.0f, 0.414f, 0.910f);
+
+    // /* 三角形1 */
+    // glTexCoord2f(0.0f, 1.0f);
+    // glVertex3v(&v[CV_B]);
+
+    // glTexCoord2f(1.0f, 1.0f);
+    // glVertex3v(&v[CV_C]);
+
+    // glTexCoord2f(1.0f, 0.0f);
+    // glVertex3v(&v[CV_H]);
+
+    // /* 三角形2 */
+    // glTexCoord2f(0.0f, 1.0f);
+    // glVertex3v(&v[CV_B]);
+
+    // glTexCoord2f(1.0f, 0.0f);
+    // glVertex3v(&v[CV_H]);
+
+    // glTexCoord2f(0.0f, 0.0f);
+    // glVertex3v(&v[CV_G]);
+
+    // glEnd();
+
+    // glBindTexture(GL_TEXTURE_2D, 0);
+    // glDisable(GL_TEXTURE_2D);
+
+    /* ===================================== */
     /* 左右側面                              */
-    /* 非平面の四角形なので三角形に分割      */
     /* ===================================== */
     glBegin(GL_TRIANGLES);
 
-    /* 左側面 1: A -> B -> G */
+    /* 左側面1 */
     glNormal3f(-0.981f, -0.177f, 0.071f);
     glVertex3v(&v[CV_A]);
     glVertex3v(&v[CV_B]);
     glVertex3v(&v[CV_G]);
 
-    /* 左側面 2: A -> G -> F */
+    /* 左側面2 */
     glNormal3f(-1.0f, 0.0f, 0.0f);
     glVertex3v(&v[CV_A]);
     glVertex3v(&v[CV_G]);
     glVertex3v(&v[CV_F]);
 
-    /* 右側面 1: D -> E -> H */
+    /* 右側面1 */
     glNormal3f(1.0f, 0.0f, 0.0f);
     glVertex3v(&v[CV_D]);
     glVertex3v(&v[CV_E]);
     glVertex3v(&v[CV_H]);
 
-    /* 右側面 2: D -> H -> C */
+    /* 右側面2 */
     glNormal3f(0.981f, -0.177f, 0.071f);
     glVertex3v(&v[CV_D]);
     glVertex3v(&v[CV_H]);
     glVertex3v(&v[CV_C]);
 
     glEnd();
+
+    drawControlPanel(v);
 
     glPopMatrix();
 }

@@ -3,7 +3,7 @@
 #include <math.h>
 #include "models/canopy.h"
 #include "models/cockpit.h"
-#include "objects/boxframe.h"
+#include "texture/texture.h"
 
 #define PI 3.14159265358979323846
 
@@ -35,15 +35,23 @@ void display(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
-    /* 光源の位置設定 */
+    // 視線方向の計算
+    float yaw   = rotY * PI / 180.0f;
+    float pitch = rotX * PI / 180.0f;
+
+    float dirX = sin(yaw) * cos(pitch);
+    float dirY = -sin(pitch);
+    float dirZ = -cos(yaw) * cos(pitch);
+
+    gluLookAt(
+        camX, camY, camZ,
+        camX + dirX,
+        camY + dirY,
+        camZ + dirZ,
+        0.0f, 1.0f, 0.0f
+    );
+
     glLightfv(GL_LIGHT0, GL_POSITION, light0pos);
-
-    /* 視点・カメラの設定 */
-    glTranslatef(-camX, -camY, -camZ);  /* 位置移動 */
-    glRotatef(rotX, 1.0f, 0.0f, 0.0f);  /* 上下回転 */
-    glRotatef(rotY, 0.0f, 1.0f, 0.0f);  /* 左右回転 */
-
-    /* カメラ変換後に呼ぶことで、コックピット内部の固定位置に光源を置く */
     glLightfv(GL_LIGHT1, GL_POSITION, cockpitLightPos);
 
     float s = 0.005f;
@@ -169,6 +177,7 @@ int main(int argc, char *argv[]) {
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
     glutInitWindowSize(1200, 511);
     glutCreateWindow(argv[0]);
+    initTextures();
     // 背景色を黒に設定（RGBA）
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glutDisplayFunc(display);

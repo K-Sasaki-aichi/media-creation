@@ -33,23 +33,4 @@ static void drawSlantedPlate(const Vec3 dir, float bottom)
     glEnd();
 }
 
-static void beginGlass(void)
-{
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glEnable(GL_DEPTH_TEST);
-    glDepthMask(GL_FALSE);
-
-    // 少し曇った青みがかったガラス
-    glColor4f(0.35f, 0.65f, 0.78f, 0.30f);
-}
-
-static void endGlass(void)
-{
-    glDepthMask(GL_TRUE);
-    glDisable(GL_BLEND);
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-}
-
 #endif
