@@ -18,7 +18,7 @@
 #define MAX_ACTIVE_PLANETS 6      /* 同時に配置可能な最大数 */
 
 /* 後から変更可能なグローバル変数 */
-static int   g_activePlanetCount = 5;      /* 表示する惑星の数（デフォルト3つ） */
+static int   g_activePlanetCount = 6;      /* 表示する惑星の数（デフォルト3つ） */
 static float g_outerSphereRadius = 120.0f; /* 配置する外周球面の半径（デフォルト200） */
 
 typedef struct {
