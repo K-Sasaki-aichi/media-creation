@@ -4,7 +4,8 @@
 #include "models/canopy.h"
 #include "models/cockpit.h"
 #include "texture/texture.h"
-#include "hyperspace.h"
+#include "objects/hyperspace.h"
+#include "objects/stars.h"
 
 #define PI 3.14159265358979323846
 
@@ -29,10 +30,17 @@ float camZ = 5.2f;
 float rotX = 12.0f;
 float rotY = 0.0f;
 
+float xwingR = 0;
+
 int isDragging = 0;
 int lastMouseX = 0, lastMouseY = 0;
 
 int frameCount = 0;
+
+GLuint swapTex(GLuint tex){
+    if(tex == texid_control_center0) return texid_control_center1;
+    else return texid_control_center0;
+}
 
 void display(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -58,8 +66,20 @@ void display(void) {
     glLightfv(GL_LIGHT1, GL_POSITION, cockpitLightPos);
 
     float s = 0.005f;
+    if(hasDrawStars()){
+        glPushMatrix();
+        glTranslatef(camX, camY, camZ);
+        glRotatef(xwingR, 0.0f, 1.0f, 0.0f);
+        glTranslatef(-camX, -camY, -camZ);
+        drawStars();
+        glPopMatrix();
+    }
+
     drawCockpit(s);
     drawHyperspace();
+
+    if((frameCount % 30) == 0) texid_control_center = swapTex(texid_control_center);
+    frameCount++;
 
     glutSwapBuffers();
 }
@@ -91,26 +111,55 @@ void motion(int x, int y) {
     }
 }
 
-void keyboard(unsigned char key, int x, int y) {
+void specialKey(int key, int x, int y) {
+    (void)x;
+    (void)y;
     float moveSpeed = 0.05f;
 
-    switch (key) {
-        case 'w': case 'W': camZ -= moveSpeed; break; /* 前進（筒の中に近づく/入る） */
-        case 's': case 'S': camZ += moveSpeed; break; /* 後退 */
-        case 'a': case 'A': camX -= moveSpeed; break; /* 左移動 */
-        case 'd': case 'D': camX += moveSpeed; break; /* 右移動 */
+    if (isHyperspaceActive()) {
+        return;
+    }
 
-        /* 上移動（R に加えて E と スペースキー を追加） */
+    switch (key) {
+        case GLUT_KEY_UP:    camZ -= moveSpeed; break; /* 前進 */
+        case GLUT_KEY_DOWN:  camZ += moveSpeed; break; /* 後退 */
+        case GLUT_KEY_LEFT:  camX -= moveSpeed; break; /* 左移動 */
+        case GLUT_KEY_RIGHT: camX += moveSpeed; break; /* 右移動 */
+        default: return;
+    }
+
+    glutPostRedisplay();
+}
+
+void keyboard(unsigned char key, int x, int y) {
+    (void)x;
+    (void)y;
+    float moveSpeed = 0.05f;
+    float rotStep = 1.0f; // glRotatef は「度」指定なので数度単位にする
+
+    /* ENTERキーでハイパースペース発動 */
+    if (key == 13 || key == '\n') {
+        startHyperspace();
+        return;
+    }
+
+    /* ハイパースペース中は移動操作を受け付けない場合 */
+    if (isHyperspaceActive()) {
+        return;
+    }
+
+    switch (key) {
+        case 'd': case 'D': xwingR += rotStep; break;
+        case 'a': case 'A': xwingR -= rotStep; break;
+
+        /* 上移動 */
         case 'r': case 'R':
-        case 'e': case 'E':
         case ' ':
             camY += moveSpeed;
             break;
 
-        /* 下移動（F に加えて Q と C を追加） */
-        case 'f': case 'F':
+        /* 下移動 */
         case 'q': case 'Q':
-        case 'c': case 'C':
             camY -= moveSpeed;
             break;
 
@@ -187,6 +236,7 @@ int main(int argc, char *argv[]) {
     glutCreateWindow(argv[0]);
     initTextures();
     initHyperspace();
+    
     //glutTimerFunc(16, updateHyperspace, 0);
     // 背景色を黒に設定（RGBA）
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -195,7 +245,7 @@ int main(int argc, char *argv[]) {
     glutMouseFunc(mouse);
     glutMotionFunc(motion);
     glutKeyboardFunc(keyboard);
-    glutIdleFunc(idle);
+    glutSpecialFunc(specialKey);
     
     init();
     glutMainLoop();

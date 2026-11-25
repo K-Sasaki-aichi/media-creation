@@ -6,7 +6,9 @@
 #define TEXTURE_HEIGHT 512
 
 GLuint texid_canopy = 0;
+GLuint texid_control_center = 0;
 GLuint texid_control_center0 = 0;
+GLuint texid_control_center1 = 0;
 GLuint texid_sidein = 0;
 GLuint texid_sideout0 = 0;
 GLuint texid_sideout1 = 0;
@@ -88,6 +90,10 @@ void initTextures(void)
         "texture/textures/center0.raw"
     );
 
+    texid_control_center1 = loadTexture(
+        "texture/textures/center1.raw"
+    );
+
     texid_sidein = loadTexture(
         "texture/textures/side_in.raw"
     );
@@ -115,4 +121,6 @@ void initTextures(void)
     texid_plate = loadTexture(
         "texture/textures/plate.raw"
     );
+
+    texid_control_center = texid_control_center0;
 }

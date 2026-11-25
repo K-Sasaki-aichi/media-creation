@@ -4,7 +4,9 @@
 #include <GL/glut.h>
 
 extern GLuint texid_canopy;
+extern GLuint texid_control_center;
 extern GLuint texid_control_center0;
+extern GLuint texid_control_center1;
 extern GLuint texid_sidein;
 extern GLuint texid_sideout0;
 extern GLuint texid_sideout1;

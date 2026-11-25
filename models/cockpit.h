@@ -290,7 +290,7 @@ static void drawControlPanel(const Vec3* v)
     
 
     glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, texid_control_center0);
+    glBindTexture(GL_TEXTURE_2D, texid_control_center);
 
     glBegin(GL_QUADS);
 
