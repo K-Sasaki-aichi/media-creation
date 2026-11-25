@@ -14,12 +14,12 @@
 #endif
 
 
-#define TOTAL_PLANET_TYPES 6      /* 用意されている惑星テクスチャの総数 */
-#define MAX_ACTIVE_PLANETS 6      /* 同時に配置可能な最大数 */
+#define TOTAL_PLANET_TYPES 7      /* 用意されている惑星テクスチャの総数 */
+#define MAX_ACTIVE_PLANETS 7      /* 同時に配置可能な最大数 */
 
 /* 後から変更可能なグローバル変数 */
-static int   g_activePlanetCount = 6;      /* 表示する惑星の数（デフォルト3つ） */
-static float g_outerSphereRadius = 120.0f; /* 配置する外周球面の半径（デフォルト200） */
+static int   g_activePlanetCount = 5;      /* 表示する惑星の数（デフォルト3つ） */
+static float g_outerSphereRadius = 100.0f; /* 配置する外周球面の半径（デフォルト200） */
 
 typedef struct {
     int   typeIndex;   /* 0〜5の惑星インデックス */
@@ -41,6 +41,7 @@ static GLuint getPlanetTexture(int index)
         case 3: return texid_planet4; // venus_atmosphere
         case 4: return texid_planet5; // venus_surface
         case 5: return texid_planet6; // mercury
+        case 6: return texid_planet7; // deth star
         default: return texid_planet1;
     }
 }
@@ -49,12 +50,13 @@ static GLuint getPlanetTexture(int index)
 static float getPlanetRadius(int index)
 {
     switch (index) {
-        case 0: return 18.0f; // jupiter（最大）
+        case 0: return 18.0f; // jupiter
         case 1: return 11.0f; // neptune
         case 2: return 15.0f; // saturn
         case 3: return 8.0f;  // venus_atmosphere
         case 4: return 8.0f;  // venus_surface
-        case 5: return 5.0f;  // mercury（最小）
+        case 5: return 5.0f;  // mercury
+        case 6: return 25.0f;  // deth star
         default: return 10.0f;
     }
 }

@@ -23,6 +23,7 @@ GLuint texid_planet3 = 0;
 GLuint texid_planet4 = 0;
 GLuint texid_planet5 = 0;
 GLuint texid_planet6 = 0;
+GLuint texid_planet7 = 0;
 
 // 指定された画像ファイルをロードする関数
 GLuint loadTexture(const char* filename)
@@ -147,6 +148,10 @@ void initTextures(void)
 
     texid_planet6 = loadTexture(
         "texture/textures/planet6.raw"
+    );
+
+    texid_planet7 = loadTexture(
+        "texture/textures/planet7.raw"
     );
 
     texid_control_center = texid_control_center0;

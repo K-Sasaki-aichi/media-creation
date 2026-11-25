@@ -23,6 +23,7 @@ extern GLuint texid_planet3; // saturn
 extern GLuint texid_planet4; // venus_atmosphere
 extern GLuint texid_planet5; // venus_surface
 extern GLuint texid_planet6; // mercury
+extern GLuint texid_planet7; // dethStar
 
 void initTextures(void);
 //void deleteTextures(void);

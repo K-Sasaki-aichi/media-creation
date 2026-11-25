@@ -42,6 +42,11 @@ int isDragging = 0;
 int lastMouseX = 0, lastMouseY = 0;
 int frameCount = 0;
 
+void initXwing(){
+    shipMoveX = 0.0f, shipMoveY = 0.0f, shipMoveZ = 0.0f;
+    xwingRy = 0.0f, xwingRx = 0.0f;
+}
+
 GLuint swapTex(GLuint tex)
 {
     return (tex == texid_control_center0) ? texid_control_center1 : texid_control_center0;
@@ -78,7 +83,7 @@ void display(void)
     glLightfv(GL_LIGHT1, GL_POSITION, cockpitLightPos);
 
     float s = 0.005f;
-    float moveSpeed = isBoost ? 0.1f : 0.01f;
+    float moveSpeed = isBoost ? 0.2f : 0.02f;
 
     /* 星空・惑星の更新と描画 */
     if (hasDrawStars()) {
@@ -90,7 +95,7 @@ void display(void)
         /* 一定距離移動でハイパースペースへ移行 */
         float distance2 = shipMoveX * shipMoveX + shipMoveY * shipMoveY + shipMoveZ * shipMoveZ;
         if (distance2 > 100.0f * 100.0f && !isHyperspaceActive()) {
-            shipMoveX = 0.0f, shipMoveY = 0.0f, shipMoveZ = 0.0f;
+            initXwing();
             startHyperspace();
         }
 
@@ -101,10 +106,13 @@ void display(void)
         glTranslatef(camX, camY, camZ);
         glRotatef(xwingRy, 0.0f, 1.0f, 0.0f);
         glRotatef(-xwingRx, 1.0f, 0.0f, 0.0f);
-        glTranslatef(-camX - shipMoveX, -camY - shipMoveY, -camZ - shipMoveZ);
-
-        drawPlanets(center, s);
         drawStars();
+
+        glPushMatrix();
+        glTranslatef(-camX - shipMoveX, -camY - shipMoveY, -camZ - shipMoveZ);
+        drawPlanets(center, s);
+        glPopMatrix();
+
         glPopMatrix();
     }
 
@@ -148,22 +156,22 @@ void motion(int x, int y)
     glutPostRedisplay();
 }
 
-void specialKey(int key, int x, int y)
-{
-    (void)x;
-    (void)y;
-    if (isHyperspaceActive()) return;
+// void specialKey(int key, int x, int y)
+// {
+//     (void)x;
+//     (void)y;
+//     if (isHyperspaceActive()) return;
 
-    float moveSpeed = 0.05f;
-    switch (key) {
-        case GLUT_KEY_UP:    shipMoveZ -= moveSpeed; break;
-        case GLUT_KEY_DOWN:  shipMoveZ += moveSpeed; break;
-        case GLUT_KEY_LEFT:  shipMoveX -= moveSpeed; break;
-        case GLUT_KEY_RIGHT: shipMoveX += moveSpeed; break;
-        default: return;
-    }
-    glutPostRedisplay();
-}
+//     float moveSpeed = 0.05f;
+//     switch (key) {
+//         case GLUT_KEY_UP:    shipMoveZ -= moveSpeed; break;
+//         case GLUT_KEY_DOWN:  shipMoveZ += moveSpeed; break;
+//         case GLUT_KEY_LEFT:  shipMoveX -= moveSpeed; break;
+//         case GLUT_KEY_RIGHT: shipMoveX += moveSpeed; break;
+//         default: return;
+//     }
+//     glutPostRedisplay();
+// }
 
 void keyboard(unsigned char key, int x, int y)
 {
@@ -171,6 +179,7 @@ void keyboard(unsigned char key, int x, int y)
     (void)y;
 
     if (key == 13 || key == '\n') {
+        initXwing();
         startHyperspace();
         return;
     }
@@ -263,7 +272,6 @@ int main(int argc, char *argv[])
     glutMouseFunc(mouse);
     glutMotionFunc(motion);
     glutKeyboardFunc(keyboard);
-    glutSpecialFunc(specialKey);
     glutKeyboardUpFunc(keyboardUp);
     glutIdleFunc(idle);
 
