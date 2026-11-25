@@ -17,6 +17,13 @@ GLuint texid_column = 0;
 GLuint texid_glass = 0;
 GLuint texid_plate = 0;
 
+GLuint texid_planet1 = 0;
+GLuint texid_planet2 = 0;
+GLuint texid_planet3 = 0;
+GLuint texid_planet4 = 0;
+GLuint texid_planet5 = 0;
+GLuint texid_planet6 = 0;
+
 // 指定された画像ファイルをロードする関数
 GLuint loadTexture(const char* filename)
 {
@@ -120,6 +127,26 @@ void initTextures(void)
 
     texid_plate = loadTexture(
         "texture/textures/plate.raw"
+    );
+
+    texid_planet1 = loadTexture(
+        "texture/textures/planet1.raw"
+    );
+    texid_planet2 = loadTexture(
+        "texture/textures/planet2.raw"
+    );
+    texid_planet3 = loadTexture(
+        "texture/textures/planet3.raw"
+    );
+    texid_planet4 = loadTexture(
+        "texture/textures/planet4.raw"
+    );
+    texid_planet5 = loadTexture(
+        "texture/textures/planet5.raw"
+    );
+
+    texid_planet6 = loadTexture(
+        "texture/textures/planet6.raw"
     );
 
     texid_control_center = texid_control_center0;

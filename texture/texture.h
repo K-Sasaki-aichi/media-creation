@@ -17,6 +17,13 @@ extern GLuint texid_plate;
 extern GLuint texid_body;
 extern GLuint texid_engine;
 
+extern GLuint texid_planet1; // jupiter
+extern GLuint texid_planet2; // neptune
+extern GLuint texid_planet3; // saturn
+extern GLuint texid_planet4; // venus_atmosphere
+extern GLuint texid_planet5; // venus_surface
+extern GLuint texid_planet6; // mercury
+
 void initTextures(void);
 //void deleteTextures(void);
 
