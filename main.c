@@ -4,6 +4,7 @@
 #include "models/canopy.h"
 #include "models/cockpit.h"
 #include "texture/texture.h"
+#include "hyperspace.h"
 
 #define PI 3.14159265358979323846
 
@@ -31,6 +32,8 @@ float rotY = 0.0f;
 int isDragging = 0;
 int lastMouseX = 0, lastMouseY = 0;
 
+int frameCount = 0;
+
 void display(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
@@ -56,6 +59,7 @@ void display(void) {
 
     float s = 0.005f;
     drawCockpit(s);
+    drawHyperspace();
 
     glutSwapBuffers();
 }
@@ -172,12 +176,18 @@ void init(void) {
     // glLightfv(GL_LIGHT1, GL_SPECULAR, green);
 }
 
+void idle(void) {
+    glutPostRedisplay();
+}
+
 int main(int argc, char *argv[]) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
     glutInitWindowSize(1200, 511);
     glutCreateWindow(argv[0]);
     initTextures();
+    initHyperspace();
+    //glutTimerFunc(16, updateHyperspace, 0);
     // 背景色を黒に設定（RGBA）
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glutDisplayFunc(display);
@@ -185,6 +195,7 @@ int main(int argc, char *argv[]) {
     glutMouseFunc(mouse);
     glutMotionFunc(motion);
     glutKeyboardFunc(keyboard);
+    glutIdleFunc(idle);
     
     init();
     glutMainLoop();
