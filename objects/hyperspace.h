@@ -15,7 +15,7 @@
 typedef struct {
     int   useFree;  // 1: 消失点に縛られない自由座標, 0: 消失点基準（少しズレあり）
     float angle;    // 中心軸まわりの角度 [rad]
-    float radius;   // 中心軸からの距離
+    float radius;   // 中心軸からの距離ma
     float offsetX;  // 星ごとの基準Xズレ
     float offsetY;  // 星ごとの基準Yズレ
     float freeX;    // 自由座標X
@@ -34,6 +34,7 @@ static int isDrawStars = 1;
 // 視点正面（camX = 0.825f, camY = 0.35f 付近）に合わせた基準座標
 static const float STAR_CENTER_X = 0.825f;
 static const float STAR_CENTER_Y = 0.35f;
+static const float STAR_CENTER_Z = 5.2f;
 static const float COCKPIT_SCALE = 0.005f;
 
 static int hyperspaceActive = 0; // 1: ハイパースペース再生中, 0: 待機中
@@ -242,6 +243,7 @@ void drawHyperspace(void) {
     else if (totalFrame < totalDur) {
         if(!isIntit){
             initStars();
+            initRandomPlanets((Vec3){STAR_CENTER_X, STAR_CENTER_Y, STAR_CENTER_Z}, 0.005f);
             isIntit = 1;
         }
         int f = totalFrame - (durA + durB);

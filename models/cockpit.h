@@ -445,7 +445,7 @@ static void initControlVertices(Vec3 out[CV_COUNT])
     out[CV_K] = withY(
         add(out[CV_I], scale(loweFrameDir, 0.125f)),
         out[CV_J].y
-    );lor3f(0.1f, 0.1f, 0.1f);    glColor3f(0.1f, 0.1f, 0.1f);
+    );
 
     out[CV_L] = withZ(
         sub(scale(out[CV_J], 1.5f),scale(out[CV_G], 0.5f)),

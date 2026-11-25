@@ -4,8 +4,10 @@
 #include "models/canopy.h"
 #include "models/cockpit.h"
 #include "texture/texture.h"
+#include "models/planets.h"
 #include "objects/hyperspace.h"
 #include "objects/stars.h"
+#include "objects/sphere.h"
 
 #define PI 3.14159265358979323846
 
@@ -26,11 +28,14 @@ float camX = 0.825f;
 float camY = 0.35f;
 float camZ = 5.2f;
 
+Vec3 center;
+
+
 // 視線の角度（0, 0 で -Z 方向＝前方。rotX を少しプラスにするとやや下向き）
 float rotX = 12.0f;
 float rotY = 0.0f;
 
-float xwingR = 0;
+float xwingRy = 0, xwingRx = 0;
 
 int isDragging = 0;
 int lastMouseX = 0, lastMouseY = 0;
@@ -69,7 +74,9 @@ void display(void) {
     if(hasDrawStars()){
         glPushMatrix();
         glTranslatef(camX, camY, camZ);
-        glRotatef(xwingR, 0.0f, 1.0f, 0.0f);
+        glRotatef(xwingRy, 0.0f, 1.0f, 0.0f);
+        glRotatef(xwingRx, 1.0f, 0.0f, 0.0f);
+        drawPlanets(center, s);
         glTranslatef(-camX, -camY, -camZ);
         drawStars();
         glPopMatrix();
@@ -77,6 +84,7 @@ void display(void) {
 
     drawCockpit(s);
     drawHyperspace();
+    
 
     if((frameCount % 30) == 0) texid_control_center = swapTex(texid_control_center);
     frameCount++;
@@ -149,11 +157,14 @@ void keyboard(unsigned char key, int x, int y) {
     }
 
     switch (key) {
-        case 'd': case 'D': xwingR += rotStep; break;
-        case 'a': case 'A': xwingR -= rotStep; break;
+        case 'd': case 'D': xwingRy += rotStep; break;
+        case 'a': case 'A': xwingRy -= rotStep; break;
+
+        case 'w': case 'W': xwingRx += rotStep; break;
+        case 's': case 'S': xwingRx -= rotStep; break;
 
         /* 上移動 */
-        case 'r': case 'R':
+        case 'e': case 'E':
         case ' ':
             camY += moveSpeed;
             break;
@@ -219,6 +230,7 @@ void init(void) {
     /* 筒の内部に入った時に内壁を正しく照らすため両面ライティングを有効化 */
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 
+    center = (Vec3){camX, camY, camZ};
     /* 必要であれば GL_LIGHT1 も有効化 */
     // glEnable(GL_LIGHT1);
     // glLightfv(GL_LIGHT1, GL_DIFFUSE, green);
