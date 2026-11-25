@@ -246,6 +246,7 @@ int main(int argc, char *argv[]) {
     glutMotionFunc(motion);
     glutKeyboardFunc(keyboard);
     glutSpecialFunc(specialKey);
+    glutIdleFunc(idle);
     
     init();
     glutMainLoop();

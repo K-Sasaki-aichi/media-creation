@@ -9,14 +9,18 @@
 #define PI 3.14159265f
 #endif
 
-#define STAR_NUM 1400
+#define STAR_NUM 2000
 
 typedef struct {
-    float x;          // 星のX座標
-    float y;          // 星のY座標
-    float z;          // 星のZ座標
-    float size;       // 星の大きさ（ポイントサイズ）
-    float brightness; // 光の強さ（0.0f 〜 1.0f）
+    float x;
+    float y;
+    float z;
+    float size;
+    float brightness;
+
+    float r;
+    float g;
+    float b;
 } BgStar;
 
 static BgStar bgStars[STAR_NUM];
@@ -30,18 +34,18 @@ static float randRange(float minVal, float maxVal) {
     return minVal + (maxVal - minVal) * ((float)rand() / (float)RAND_MAX);
 }
 
-void initStars(void) {
+void initStars(void)
+{
     const float minR = 85.0f;
     const float maxR = 95.0f;
 
     for (int i = 0; i < STAR_NUM; i++) {
+
         float r = randRange(minR, maxR);
 
-        // 球面上に偏りなく分布させるための角度計算
         float theta = randRange(0.0f, 2.0f * (float)PI);
         float cosPhi = randRange(-1.0f, 1.0f);
         float sinPhi = sqrtf(1.0f - cosPhi * cosPhi);
-        if (sinPhi < 0.0f) sinPhi = 0.0f;
 
         float dx = r * sinPhi * cosf(theta);
         float dy = r * cosPhi;
@@ -51,11 +55,38 @@ void initStars(void) {
         bgStars[i].y = STAR_ORIGIN_Y + dy;
         bgStars[i].z = STAR_ORIGIN_Z + dz;
 
-        bgStars[i].size = randRange(1.2f, 5.0f);
-        bgStars[i].brightness = randRange(0.35f, 1.0f);
+        bgStars[i].size = randRange(1.2f, 6.0f);
+        bgStars[i].brightness = randRange(0.45f, 1.0f);
+
+        /* 星色をランダム化 */
+        float type = randRange(0.0f, 1.0f);
+
+        if (type < 0.55f) {
+            /* 白 */
+            bgStars[i].r = 1.0f;
+            bgStars[i].g = 1.0f;
+            bgStars[i].b = 1.0f;
+        }
+        else if (type < 0.75f) {
+            /* 青白 */
+            bgStars[i].r = 0.75f;
+            bgStars[i].g = 0.85f;
+            bgStars[i].b = 1.0f;
+        }
+        else if (type < 0.92f) {
+            /* 黄白 */
+            bgStars[i].r = 1.0f;
+            bgStars[i].g = 0.95f;
+            bgStars[i].b = 0.75f;
+        }
+        else {
+            /* 赤系 */
+            bgStars[i].r = 1.0f;
+            bgStars[i].g = 0.7f;
+            bgStars[i].b = 0.55f;
+        }
     }
 }
-
 void drawStars(void) {
     GLboolean wasLight = glIsEnabled(GL_LIGHTING);
     GLboolean wasTex2D = glIsEnabled(GL_TEXTURE_2D);
@@ -73,14 +104,33 @@ void drawStars(void) {
     glEnable(GL_POINT_SMOOTH);
     glDepthMask(GL_FALSE); // 背景の星で深度バッファを塞がない
 
+    float t = glutGet(GLUT_ELAPSED_TIME) * 0.001f;
+
     for (int i = 0; i < STAR_NUM; i++) {
-        float b = bgStars[i].brightness;
+
+        /* 微弱な瞬き */
+        float twinkle = 0.70f + 0.15f * sinf(t * 2.0f + i * 0.37f);
+
+        float br =
+            bgStars[i].brightness * twinkle;
 
         glPointSize(bgStars[i].size);
+
         glBegin(GL_POINTS);
-        // ごくわずかに青白〜白系の星色
-        glColor4f(0.88f * b, 0.94f * b, 1.0f * b, b);
-        glVertex3f(bgStars[i].x, bgStars[i].y, bgStars[i].z);
+
+        glColor4f(
+            bgStars[i].r * br,
+            bgStars[i].g * br,
+            bgStars[i].b * br,
+            br
+        );
+
+        glVertex3f(
+            bgStars[i].x,
+            bgStars[i].y,
+            bgStars[i].z
+        );
+
         glEnd();
     }
 

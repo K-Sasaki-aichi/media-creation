@@ -216,7 +216,7 @@ void drawHyperspace(void) {
     if (!hyperspaceEnabled || !hyperspaceActive) return;
 
     int a = 5;
-    int b = 10;
+    int b = 8;
     int c = 1;
 
     int durA = 30 * a; // 加速
