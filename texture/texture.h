@@ -25,6 +25,12 @@ extern GLuint texid_planet5; // venus_surface
 extern GLuint texid_planet6; // mercury
 extern GLuint texid_planet7; // dethStar
 
+extern GLuint texid_hwall;
+extern GLuint texid_ceiling;
+extern GLuint texid_ground;
+
+extern GLuint texid_asteroid;
+
 void initTextures(void);
 //void deleteTextures(void);
 

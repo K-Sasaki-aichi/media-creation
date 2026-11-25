@@ -25,6 +25,12 @@ GLuint texid_planet5 = 0;
 GLuint texid_planet6 = 0;
 GLuint texid_planet7 = 0;
 
+GLuint texid_hwall = 0;
+GLuint texid_ceiling = 0;
+GLuint texid_ground = 0;
+
+GLuint texid_asteroid = 0;
+
 // 指定された画像ファイルをロードする関数
 GLuint loadTexture(const char* filename)
 {
@@ -154,5 +160,19 @@ void initTextures(void)
         "texture/textures/planet7.raw"
     );
 
+    texid_hwall = loadTexture(
+        "texture/textures/hwall.raw"
+    );
+    texid_ceiling = loadTexture(
+        "texture/textures/ceiling.raw"
+    );
+    texid_ground = loadTexture(
+        "texture/textures/ground.raw"
+    );
+    
+    texid_asteroid = loadTexture(
+        "texture/textures/asteroid.raw"
+    );
+    
     texid_control_center = texid_control_center0;
 }

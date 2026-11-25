@@ -8,6 +8,8 @@
 #include "../objects/cuboid.h"
 #include "../objects/board.h"
 #include "../texture/texture.h"
+#include "../objects/joystick.h"
+#include "../models/seat.h"
 
 #ifndef PI
 #define PI 3.14159265f
@@ -483,6 +485,20 @@ static void drawCockpit(float s){
     drawWall(-70, s, v);
 
     drawFloor(-316.89f, s);
+
+    /* 操縦桿 */
+    glPushMatrix();
+    glScalef(s, s, s);
+    glTranslatef(165.0f, -300.0f, 600.0f);
+    drawControlStick();
+    glPopMatrix();
+
+    /* 椅子 */
+    glPushMatrix();
+    glScalef(s, s, s);
+    glTranslatef(165.0f, 0.0f, 1000.0f);
+    drawSeat();
+    glPopMatrix();
 }
 
 #endif

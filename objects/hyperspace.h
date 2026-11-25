@@ -6,6 +6,8 @@
 #include <math.h>
 #include <GL/glut.h>
 
+#include "../models/asteroids.h"
+
 #ifndef PI
 #define PI 3.14159265f
 #endif
@@ -244,6 +246,7 @@ void drawHyperspace(void) {
         if(!isIntit){
             initStars();
             initRandomPlanets((Vec3){STAR_CENTER_X, STAR_CENTER_Y, STAR_CENTER_Z}, 0.005f);
+            initRandomAsteroids((Vec3){STAR_CENTER_X, STAR_CENTER_Y, STAR_CENTER_Z}, 0.005f);
             isIntit = 1;
         }
         int f = totalFrame - (durA + durB);

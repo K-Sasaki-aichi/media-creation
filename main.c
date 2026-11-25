@@ -9,10 +9,13 @@
 #include "objects/hyperspace.h"
 #include "objects/stars.h"
 #include "objects/sphere.h"
+#include "models/hangar.h"
+#include "models/asteroids.h"
 
 #define INITIAL_CAM_X 0.825f
-#define INITIAL_CAM_Y 0.35f
-#define INITIAL_CAM_Z 5.2f
+#define INITIAL_CAM_Y 0.28f
+#define INITIAL_CAM_Z 5.0f
+#define HANGAR_WAIT_FRAMES 50
 #define PI 3.14159265358979323846
 
 /* 光源・マテリアル設定 */
@@ -36,15 +39,65 @@ float xwingRy = 0.0f, xwingRx = 0.0f;
 float shipMoveX = 0.0f, shipMoveY = 0.0f, shipMoveZ = 0.0f;
 float isBoost = 0.0f;
 
+/* ハンガー・発進アニメーション状態 */
+int isHanger = 1;
+int isLaunching = 0;
+int hangarFrames = 0;
+float liftOffsetY = 0.0f;
+float advanceOffsetZ = 0.0f;
+
 /* その他状態変数 */
 Vec3 center;
 int isDragging = 0;
 int lastMouseX = 0, lastMouseY = 0;
 int frameCount = 0;
 
-void initXwing(){
-    shipMoveX = 0.0f, shipMoveY = 0.0f, shipMoveZ = 0.0f;
-    xwingRy = 0.0f, xwingRx = 0.0f;
+void initXwing(void)
+{
+    shipMoveX = 0.0f;
+    shipMoveY = 0.0f;
+    shipMoveZ = 0.0f;
+    xwingRy = 0.0f;
+    xwingRx = 0.0f;
+}
+
+void startLaunch(void)
+{
+    if (!isHanger || isLaunching || isHyperspaceActive()) return;
+
+    initXwing();
+    liftOffsetY = 0.0f;
+    advanceOffsetZ = 0.0f;
+    isLaunching = 1;
+}
+
+void updateLaunch(void)
+{
+    const float targetLiftY = 2.50f;     /* 浮き上がる高さ */
+    const float liftSpeed = 0.01f;       /* 浮上速度 */
+    const float advanceSpeed = 0.2f;     /* まっすぐ進む速度 */
+    const float exitDistance = 80.0f;    /* ハンガーをある程度抜ける距離 */
+
+    if (!isLaunching) return;
+
+    if (liftOffsetY < targetLiftY) {
+        liftOffsetY += liftSpeed;
+        if (liftOffsetY > targetLiftY) {
+            liftOffsetY = targetLiftY;
+        }
+        return;
+    }
+
+    advanceOffsetZ += advanceSpeed;
+    if (advanceOffsetZ >= exitDistance) {
+        isLaunching = 0;
+        isHanger = 0;
+        hangarFrames = 0;
+        liftOffsetY = 0.0f;
+        advanceOffsetZ = 0.0f;
+        initXwing();
+        startHyperspace();
+    }
 }
 
 GLuint swapTex(GLuint tex)
@@ -62,6 +115,15 @@ Vec3 getDir(void)
         sinf(radX) * cosf(radY),
         -cosf(radX) * cosf(radY)
     };
+}
+
+void drawHangarScene(void)
+{
+    glPushMatrix();
+    /* 機体が浮上・前進した分だけハンガーを相対移動 */
+    glTranslatef(0.825f, -2.2f - liftOffsetY, -10.5f + advanceOffsetZ);
+    drawHangar(56.0f, 90.0f, 11.0f);
+    glPopMatrix();
 }
 
 void display(void)
@@ -85,8 +147,24 @@ void display(void)
     float s = 0.005f;
     float moveSpeed = isBoost ? 0.2f : 0.02f;
 
+    if (isHanger) {
+        hangarFrames++;
+        glPushMatrix();
+        glTranslatef(0, 0, -60);
+        drawStars();
+        glPopMatrix();
+        
+        if (hangarFrames >= HANGAR_WAIT_FRAMES) {
+            if (!isLaunching) {
+                startLaunch();
+            }
+            updateLaunch();
+        }
+        drawHangarScene();
+    }
+
     /* 星空・惑星の更新と描画 */
-    if (hasDrawStars()) {
+    if (hasDrawStars() && !isHanger) {
         Vec3 dir = getDir();
         shipMoveX += dir.x * moveSpeed;
         shipMoveY += dir.y * moveSpeed;
@@ -110,6 +188,7 @@ void display(void)
 
         glPushMatrix();
         glTranslatef(-camX - shipMoveX, -camY - shipMoveY, -camZ - shipMoveZ);
+        drawAsteroids(center, s);
         drawPlanets(center, s);
         glPopMatrix();
 
@@ -156,29 +235,16 @@ void motion(int x, int y)
     glutPostRedisplay();
 }
 
-// void specialKey(int key, int x, int y)
-// {
-//     (void)x;
-//     (void)y;
-//     if (isHyperspaceActive()) return;
-
-//     float moveSpeed = 0.05f;
-//     switch (key) {
-//         case GLUT_KEY_UP:    shipMoveZ -= moveSpeed; break;
-//         case GLUT_KEY_DOWN:  shipMoveZ += moveSpeed; break;
-//         case GLUT_KEY_LEFT:  shipMoveX -= moveSpeed; break;
-//         case GLUT_KEY_RIGHT: shipMoveX += moveSpeed; break;
-//         default: return;
-//     }
-//     glutPostRedisplay();
-// }
-
 void keyboard(unsigned char key, int x, int y)
 {
     (void)x;
     (void)y;
 
+    /* 発進アニメーション中はキー入力を受け付けない */
+    if (isLaunching) return;
+
     if (key == 13 || key == '\n') {
+        if (isHanger) return;
         initXwing();
         startHyperspace();
         return;
@@ -265,6 +331,7 @@ int main(int argc, char *argv[])
 
     initTextures();
     initHyperspace();
+    initStars();
     init();
 
     glutDisplayFunc(display);
